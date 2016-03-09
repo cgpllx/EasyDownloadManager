@@ -64,6 +64,16 @@ public class MainActivity extends Activity {
         urls.add("http://down.mumayi.com/41052/mbaidu");
         urls.add("http://down.mumayi.com/41052/mbaidu");
         urls.add("http://down.mumayi.com/41052/mbaidu");
+        urls.add("http://down.mumayi.com/41052/mbaidu");
+        urls.add("http://down.mumayi.com/41052/mbaidu");
+        urls.add("http://down.mumayi.com/41052/mbaidu");
+        urls.add("http://down.mumayi.com/41052/mbaidu");
+        urls.add("http://down.mumayi.com/41052/mbaidu");
+        urls.add("http://down.mumayi.com/41052/mbaidu");
+        urls.add("http://down.mumayi.com/41052/mbaidu");
+        urls.add("http://down.mumayi.com/41052/mbaidu");
+        urls.add("http://down.mumayi.com/41052/mbaidu");
+        urls.add("http://down.mumayi.com/41052/mbaidu");
         adapter.setUrls(urls);
 
     }

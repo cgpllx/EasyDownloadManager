@@ -29,7 +29,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
 
     public MyAdapter(Context context) {
         this.context = context;
-        EasyDownLoadManager.open(context).addObserver(this);
+        EasyDownLoadManager.getInstance(context).addObserver(this);
 //EasyDownLoadManager.open(context).r
     }
 
@@ -78,7 +78,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
                 request.setDescription("Just for test");
 //                request.setId(2);
 //                android.widget.CursorAdapter cursorAdapter;
-                EasyDownLoadManager.open(context).getDownloadManager().enqueue(request);
+                EasyDownLoadManager.getInstance(context).getDownloadManager().enqueue(request);
             }
         });
         if (mDownloadingTask != null && mDownloadingTask.containsKey(getItem(position) + position)) {

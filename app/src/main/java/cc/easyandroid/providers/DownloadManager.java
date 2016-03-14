@@ -16,14 +16,6 @@
 
 package cc.easyandroid.providers;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -37,6 +29,14 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
 import android.util.Pair;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import cc.easyandroid.providers.downloads.Downloads;
 
@@ -828,7 +828,7 @@ public class DownloadManager {
                     orderBy);
         }
 
-        void startAsyncQuery(AsyncQueryHandler asyncQueryHandler, ContentResolver resolver, String[] projection,
+        void startAsyncQuery(AsyncQueryHandler asyncQueryHandler, int token, Object cookie, ContentResolver resolver, String[] projection,
                              Uri baseUri) {
             Uri uri = baseUri;
             List<String> selectionParts = new ArrayList<String>();
@@ -875,7 +875,7 @@ public class DownloadManager {
             String orderDirection = (mOrderDirection == ORDER_ASCENDING ? "ASC"
                     : "DESC");
             String orderBy = mOrderByColumn + " " + orderDirection;
-            asyncQueryHandler.startQuery(0, "", uri, projection, selection, selectionArgs, orderBy);
+            asyncQueryHandler.startQuery(token, cookie, uri, projection, selection, selectionArgs, orderBy);
         }
 
         private String joinStrings(String joiner, Iterable<String> parts) {
@@ -998,7 +998,7 @@ public class DownloadManager {
     }
 
     public void query(AsyncQueryHandler asyncQueryHandler, int token, Object cookie, Query query) {
-        query.startAsyncQuery(asyncQueryHandler, mResolver, UNDERLYING_COLUMNS,
+        query.startAsyncQuery(asyncQueryHandler,token,cookie, mResolver, UNDERLYING_COLUMNS,
                 mBaseUri);
 
     }

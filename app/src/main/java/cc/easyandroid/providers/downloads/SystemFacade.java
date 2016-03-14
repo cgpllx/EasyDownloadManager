@@ -62,7 +62,7 @@ interface SystemFacade {
     public void cancelAllNotifications();
 
     /**
-     * Start a thread.
+     * Start a thread. 是否加入到线程池，不加入就会马上执行
      */
-    public void startThread(Thread thread);
+    public void startThread(Thread thread, boolean joinToThreadPool);
 }

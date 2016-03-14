@@ -16,11 +16,6 @@
 
 package cc.easyandroid.providers.downloads;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -32,6 +27,11 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.util.Log;
 import android.util.Pair;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import cc.easyandroid.providers.DownloadManager;
 
@@ -291,7 +291,7 @@ public class DownloadInfo {
         }
         return mLastMod +
                 Constants.RETRY_FIRST_DELAY *
-                    (1000 + mFuzz) * (1 << (mNumFailed - 1));
+                        (1000 + mFuzz) * (1 << (mNumFailed - 1));
     }
 
     /**
@@ -311,7 +311,7 @@ public class DownloadInfo {
             case 0: // status hasn't been initialized yet, this is a new download
             case Downloads.STATUS_PENDING: // download is explicit marked as ready to start
             case Downloads.STATUS_RUNNING: // download interrupted (process killed etc) while
-                                                // running, without a chance to update the database
+                // running, without a chance to update the database
                 return true;
 
             case Downloads.STATUS_WAITING_FOR_NETWORK:
@@ -341,6 +341,7 @@ public class DownloadInfo {
 
     /**
      * Returns whether this download is allowed to use the network.
+     *
      * @return one of the NETWORK_* constants
      */
     public int checkCanUseNetwork() {
@@ -390,6 +391,7 @@ public class DownloadInfo {
 
     /**
      * Check if this download can proceed over the given network type.
+     *
      * @param networkType a constant from ConnectivityManager.TYPE_*.
      * @return one of the NETWORK_* constants
      */
@@ -422,6 +424,7 @@ public class DownloadInfo {
 
     /**
      * Check if the download's size prohibits it from running over the current network.
+     *
      * @return one of the NETWORK_* constants
      */
     private int checkSizeAllowedForNetwork(int networkType) {
@@ -465,7 +468,7 @@ public class DownloadInfo {
         }
         DownloadThread downloader = new DownloadThread(mContext, mSystemFacade, this);
         mHasActiveThread = true;
-        mSystemFacade.startThread(downloader);
+        mSystemFacade.startThread(downloader, true);//这里不能马上执行线程，防止线程太多
     }
 
     public Uri getMyDownloadsUri() {

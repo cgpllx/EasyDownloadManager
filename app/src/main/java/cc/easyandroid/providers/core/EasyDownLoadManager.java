@@ -5,13 +5,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.database.CursorWrapper;
 import android.database.DataSetObserver;
-import android.net.Uri;
 import android.os.Handler;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Observable;
 
@@ -39,6 +36,9 @@ public class EasyDownLoadManager extends Observable {
      */
     protected DataSetObserver mDataSetObserver;
 
+    protected DbStatusRefreshTask refreshTask;
+    protected DownloadManager.Query baseQuery;
+
     /**
      * default constructor
      *
@@ -47,10 +47,14 @@ public class EasyDownLoadManager extends Observable {
     private EasyDownLoadManager(Context context) {
         synchronized (this) {
             mContext = context;
-            mDownloadManager = new DownloadManager(context.getContentResolver(), context.getPackageName());
-            mDownloadingList = new HashMap<String, EasyDownLoadInfo>();
+            ContentResolver resolver = context.getContentResolver();
+            mDownloadManager = new DownloadManager(resolver, context.getPackageName());
+            mDownloadingList = new HashMap<>();
             mChangeObserver = new ChangeObserver();
             mDataSetObserver = new MyDataSetObserver();
+
+            refreshTask = new DbStatusRefreshTask(resolver);
+            baseQuery = new DownloadManager.Query();
             startQuery();
         }
     }
@@ -68,12 +72,8 @@ public class EasyDownLoadManager extends Observable {
         return mInstance;
     }
 
-
     private void startQuery() {
-        System.out.println("cgp=startQuery"+111);
-        DbStatusRefreshTask refreshTask = new DbStatusRefreshTask(mContext.getContentResolver());
-        DownloadManager.Query baseQuery = new DownloadManager.Query();
-        mDownloadManager.query(refreshTask, DbStatusRefreshTask.DOWNLOAD, null, baseQuery);
+        mDownloadManager.query(refreshTask, DbStatusRefreshTask.DOWNLOAD, null, baseQuery);//异步查询
     }
 
 
@@ -81,23 +81,20 @@ public class EasyDownLoadManager extends Observable {
     * 刷新正在下载中的应用
     */
     private void refreshDownloadApp(Cursor cursor) {
-//System.out.println("cgp=refreshDownloadApp"+cursor);
         if (cursor.getCount() > 0) {
             // 检索有结果
-            mDownloadingList = new HashMap<String, EasyDownLoadInfo>();
-            System.out.println("cgp=cursor.getCount() ＝"+cursor.getCount() );
+            mDownloadingList = new HashMap<>();
         } else {
-            System.out.println("cgp=cursor.getCount() ＝"+cursor.getCount() );
             return;
         }
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-//            System.out.println("cgp=cursor.cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()() ＝"+cursor.getCount() );
+            //System.out.println("cgp=cursor.cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()() ＝"+cursor.getCount() );
             //获取index
             int mIdColumnId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_ID);//id
             int mStatusColumnId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS); //status
             int mTotalBytesColumnId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);//总大小
-            int mCurrentBytesColumnId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR );//下载大小
-            int mLocalUriId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI );//本地路径  apkpath
+            int mCurrentBytesColumnId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);//下载大小
+            int mLocalUriId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI);//本地路径  apkpath
             int mTitleColumnId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE); //title
             int mURIColumnId = cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_URI);//下载diz
 
@@ -111,14 +108,12 @@ public class EasyDownLoadManager extends Observable {
             infoItem.setTitle(cursor.getString(mTitleColumnId));
             infoItem.setUri(cursor.getString(mURIColumnId));
 
-            mDownloadingList.put(infoItem.getUri()+infoItem.getTitle(), infoItem);
-            System.out.println("cgp=refreshDownloadApp="+infoItem.getCurrentBytes());
-            System.out.println("cgp=refreshDownloadApp总大笑="+infoItem.getTotalBytes());
+            mDownloadingList.put(infoItem.getUri() + infoItem.getTitle(), infoItem);
+            System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
+            System.out.println("cgp=refreshDownloadApp总大笑=" + infoItem.getTotalBytes());
             if (DownloadManager.isStatusRunning(infoItem.getStatus())) {//正在下载
                 // downloading progress
-                System.out.println("cgp=refreshDownloadApp="+infoItem.getCurrentBytes());
-
-
+                System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
             } else if (DownloadManager.isStatusPending(infoItem.getStatus())) {//等待
                 // 下载等待中
 
@@ -130,6 +125,8 @@ public class EasyDownLoadManager extends Observable {
                 }
             } else if (infoItem.getStatus() == DownloadManager.STATUS_PAUSED) {// 暂停 //
 
+            }else{
+                System.out.println("下载出错");
             }
         }
     }
@@ -163,13 +160,21 @@ public class EasyDownLoadManager extends Observable {
         }
         Cursor oldCursor = mDownloadingCursor;
         if (oldCursor != null) {
-            if (mChangeObserver != null) oldCursor.unregisterContentObserver(mChangeObserver);
-            if (mDataSetObserver != null) oldCursor.unregisterDataSetObserver(mDataSetObserver);
+            if (mChangeObserver != null) {
+                oldCursor.unregisterContentObserver(mChangeObserver);
+            }
+            if (mDataSetObserver != null) {
+                oldCursor.unregisterDataSetObserver(mDataSetObserver);
+            }
         }
         mDownloadingCursor = newCursor;
         if (newCursor != null) {
-            if (mChangeObserver != null) newCursor.registerContentObserver(mChangeObserver);
-            if (mDataSetObserver != null) newCursor.registerDataSetObserver(mDataSetObserver);
+            if (mChangeObserver != null) {
+                newCursor.registerContentObserver(mChangeObserver);
+            }
+            if (mDataSetObserver != null) {
+                newCursor.registerDataSetObserver(mDataSetObserver);
+            }
             // notify the observers about the new cursor
             refreshDownloadApp(newCursor);
             notifyDataSetChanged();
@@ -185,7 +190,7 @@ public class EasyDownLoadManager extends Observable {
      */
     private class DbStatusRefreshTask extends AsyncQueryHandler {
 
-        private final static int DOWNLOAD = 0;
+        private final static int DOWNLOAD = 0; //token
         private final static int UPDATE = 1;
 
         public DbStatusRefreshTask(ContentResolver cr) {
@@ -197,9 +202,7 @@ public class EasyDownLoadManager extends Observable {
 
             switch (token) {
                 case DOWNLOAD:
-                    System.out.println("cgp=onQueryComplete"+111);
-
-                    changeCursor( new DownloadManager.CursorTranslator(cursor, Downloads.CONTENT_URI));
+                    changeCursor(new DownloadManager.CursorTranslator(cursor, Downloads.CONTENT_URI));
                     break;
                 default:
                     break;
@@ -209,11 +212,7 @@ public class EasyDownLoadManager extends Observable {
 
 
     private void requeryCursor() {
-//        mDownloadingCursor.requery();
         startQuery();
-        synchronized (this) {
-//            refreshDownloadApp(mDownloadingCursor);
-        }
     }
 
     public void close() {

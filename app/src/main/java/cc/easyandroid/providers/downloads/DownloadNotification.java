@@ -16,9 +16,6 @@
 
 package cc.easyandroid.providers.downloads;
 
-import java.util.Collection;
-import java.util.HashMap;
-
 import android.app.PendingIntent;
 import android.content.ContentUris;
 import android.content.Context;
@@ -27,6 +24,9 @@ import android.net.Uri;
 import android.support.v7.app.NotificationCompat;
 import android.view.View;
 import android.widget.RemoteViews;
+
+import java.util.Collection;
+import java.util.HashMap;
 
 import cc.easyandroid.downloadprovider.R;
 

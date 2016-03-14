@@ -934,8 +934,6 @@ public class DownloadManager {
     public long enqueue(Request request) {
         ContentValues values = request.toContentValues(mPackageName);
         Uri downloadUri = mResolver.insert(Downloads.CONTENT_URI, values);
-        System.out.println("cgp=" + downloadUri);
-        System.out.println("cgp11=" + downloadUri.getLastPathSegment());
         long id = Long.parseLong(downloadUri.getLastPathSegment());
         return id;
     }
@@ -998,7 +996,7 @@ public class DownloadManager {
     }
 
     public void query(AsyncQueryHandler asyncQueryHandler, int token, Object cookie, Query query) {
-        query.startAsyncQuery(asyncQueryHandler,token,cookie, mResolver, UNDERLYING_COLUMNS,
+        query.startAsyncQuery(asyncQueryHandler, token, cookie, mResolver, UNDERLYING_COLUMNS,
                 mBaseUri);
 
     }
@@ -1392,4 +1390,6 @@ public class DownloadManager {
             }
         }
     }
+
+
 }

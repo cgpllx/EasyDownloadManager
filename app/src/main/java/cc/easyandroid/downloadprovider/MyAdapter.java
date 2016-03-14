@@ -29,8 +29,6 @@ public class MyAdapter extends BaseAdapter implements Observer {
 
     public MyAdapter(Context context) {
         this.context = context;
-        EasyDownLoadManager.getInstance(context).addObserver(this);
-//EasyDownLoadManager.open(context).r
     }
 
     Context context;
@@ -62,6 +60,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
         if (convertView == null || convertView.getTag() == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.item, parent, false);
             holder = new ViewHolder(convertView);
+            convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
@@ -73,30 +72,60 @@ public class MyAdapter extends BaseAdapter implements Observer {
                 Uri srcUri = Uri.parse(url);
                 DownloadManager.Request request = new DownloadManager.Request(srcUri);
                 request.setTitle("" + position);
+//                request.setId()
                 request.setDestinationInExternalPublicDir(
                         Environment.DIRECTORY_DOWNLOADS, "/");
                 request.setDescription("Just for test");
-//                request.setId(2);
-//                android.widget.CursorAdapter cursorAdapter;
                 EasyDownLoadManager.getInstance(context).getDownloadManager().enqueue(request);
             }
         });
-        if (mDownloadingTask != null && mDownloadingTask.containsKey(getItem(position) + position)) {
-            EasyDownLoadInfo easyDownLoadInfo = mDownloadingTask.get(getItem(position) + position);
-            System.out.println("下载的大小＝" + easyDownLoadInfo.getCurrentBytes());
-            holder.progress_text.setText("下载的大小＝" + easyDownLoadInfo.getCurrentBytes());
-        }
+//        String key = getItem(position) + position;
+        updataView(position, holder);
         return convertView;
+    }
+
+    public void updataView(int position, ViewHolder holder) {
+        String key = getItem(position) + position;
+        if (mDownloadingTask != null && mDownloadingTask.containsKey(key)) {
+            EasyDownLoadInfo easyDownLoadInfo = mDownloadingTask.get(key);
+            holder.progress_text.setText(easyDownLoadInfo.getStatus() + "下载的大小＝" + easyDownLoadInfo.getCurrentBytes());
+        } else {
+            holder.progress_text.setText("进度");
+        }
     }
 
     @Override
     public void update(Observable observable, Object data) {
         if (data instanceof HashMap) {
             mDownloadingTask = (HashMap<String, EasyDownLoadInfo>) data;
-            System.out.println("收到消息" + data);
-            notifyDataSetChanged();
+            notifyItemData();
         }
     }
+
+    IVisiblePosition visiblePosition;
+
+    public void setIVisiblePosition(IVisiblePosition visiblePosition) {
+        this.visiblePosition = visiblePosition;
+    }
+
+    public void notifyItemData() {
+        if (visiblePosition == null) {
+            return;
+        }
+        int firstVisiblePosition = visiblePosition.getFirstVisiblePosition();
+        int lastVisiblePosition = visiblePosition.getLastVisiblePosition();
+        for (int i = firstVisiblePosition; i <= lastVisiblePosition; i++) {
+            View view = visiblePosition.getVisibleView(i);
+            if (view != null) {
+                Object object = view.getTag();
+                if (object != null && object instanceof ViewHolder) {
+                    ViewHolder holder = (ViewHolder) object;
+                    updataView(i, holder);
+                }
+            }
+        }
+    }
+
 
     class ViewHolder {
         public ViewHolder(View view) {

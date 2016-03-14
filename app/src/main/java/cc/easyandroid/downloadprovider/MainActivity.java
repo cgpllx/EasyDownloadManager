@@ -2,6 +2,7 @@ package cc.easyandroid.downloadprovider;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -17,9 +18,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        EasyDownLoadManager.getInstance(this);
         listView = (ListView) findViewById(R.id.listview);
         adapter = new MyAdapter(this);
+        EasyDownLoadManager.getInstance(this).addObserver(adapter);
         listView.setAdapter(adapter);
         List<String> urls = new ArrayList<>();
         urls.add("http://down.mumayi.com/41052/mbaidu");
@@ -70,13 +71,31 @@ public class MainActivity extends Activity {
         urls.add("http://down.mumayi.com/41052/mbaidu");
         urls.add("http://down.mumayi.com/41052/mbaidu");
         urls.add("http://down.mumayi.com/41052/mbaidu");
-        adapter.setUrls(urls);
+        adapter.setIVisiblePosition(new IVisiblePosition() {
+            @Override
+            public int getFirstVisiblePosition() {
+                return listView.getFirstVisiblePosition();
+            }
 
+            @Override
+            public int getLastVisiblePosition() {
+//                listView.get
+                return listView.getLastVisiblePosition();
+            }
+
+            @Override
+            public View getVisibleView(int position) {
+                ;
+                return listView.getChildAt((position - getFirstVisiblePosition()) % listView.getChildCount());
+            }
+        });
+        adapter.setUrls(urls);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        EasyDownLoadManager.getInstance(this).deleteObserver(adapter);
         EasyDownLoadManager.destroy();
     }
 }

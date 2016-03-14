@@ -11,6 +11,7 @@ import android.os.Handler;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Observable;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import cc.easyandroid.providers.DownloadManager;
 import cc.easyandroid.providers.downloads.Downloads;
@@ -228,6 +229,7 @@ public class EasyDownLoadManager extends Observable {
             mDownloadingCursor.close();
             mDownloadingCursor = null;
         }
+        deleteObservers();
         mInstance = null;
     }
 
@@ -276,5 +278,10 @@ public class EasyDownLoadManager extends Observable {
         public void onInvalidated() {
             notifyDataSetInvalidated();
         }
+    }
+    private static final ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(3);//下载app用的线程池
+
+    public static void setCorePoolSize(int corePoolSize) {
+        threadPoolExecutor.setCorePoolSize(corePoolSize);
     }
 }

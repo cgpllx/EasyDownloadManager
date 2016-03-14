@@ -65,7 +65,7 @@ public class EasyDownLoadManager extends Observable {
 
     private static EasyDownLoadManager mInstance;
 
-    public static EasyDownLoadManager open(Context context) {
+    public static EasyDownLoadManager getInstance(Context context) {
         if (mInstance == null) {
             mInstance = new EasyDownLoadManager(context);
         }
@@ -110,7 +110,7 @@ public class EasyDownLoadManager extends Observable {
 
             mDownloadingList.put(infoItem.getUri() + infoItem.getTitle(), infoItem);
             System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
-            System.out.println("cgp=refreshDownloadApp总大笑=" + infoItem.getTotalBytes());
+            System.out.println("cgp=refreshDownloadApp总大小=" + infoItem.getTotalBytes());
             if (DownloadManager.isStatusRunning(infoItem.getStatus())) {//正在下载
                 // downloading progress
                 System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
@@ -125,7 +125,7 @@ public class EasyDownLoadManager extends Observable {
                 }
             } else if (infoItem.getStatus() == DownloadManager.STATUS_PAUSED) {// 暂停 //
 
-            }else{
+            } else {
                 System.out.println("下载出错");
             }
         }
@@ -217,13 +217,24 @@ public class EasyDownLoadManager extends Observable {
 
     public void close() {
         if (mDownloadingCursor != null) {
-            if (mChangeObserver != null)
+            if (mChangeObserver != null) {
                 mDownloadingCursor.unregisterContentObserver(mChangeObserver);
-            if (mDataSetObserver != null)
+                mChangeObserver = null;
+            }
+            if (mDataSetObserver != null) {
                 mDownloadingCursor.unregisterDataSetObserver(mDataSetObserver);
+                mDataSetObserver = null;
+            }
             mDownloadingCursor.close();
+            mDownloadingCursor = null;
         }
         mInstance = null;
+    }
+
+    public static void destroy() {
+        if (mInstance != null) {
+            mInstance.close();
+        }
     }
 
     /**

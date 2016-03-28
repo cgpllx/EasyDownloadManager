@@ -110,11 +110,11 @@ public class EasyDownLoadManager extends Observable {
             infoItem.setUri(cursor.getString(mURIColumnId));
 
             mDownloadingList.put(infoItem.getUri() + infoItem.getTitle(), infoItem);
-            System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
-            System.out.println("cgp=refreshDownloadApp总大小=" + infoItem.getTotalBytes());
+//            System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
+//            System.out.println("cgp=refreshDownloadApp总大小=" + infoItem.getTotalBytes());
             if (DownloadManager.isStatusRunning(infoItem.getStatus())) {//正在下载
                 // downloading progress
-                System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
+//                System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
             } else if (DownloadManager.isStatusPending(infoItem.getStatus())) {//等待
                 // 下载等待中
 
@@ -127,7 +127,7 @@ public class EasyDownLoadManager extends Observable {
             } else if (infoItem.getStatus() == DownloadManager.STATUS_PAUSED) {// 暂停 //
 
             } else {
-                System.out.println("下载出错");
+//                System.out.println("下载出错");
             }
         }
     }

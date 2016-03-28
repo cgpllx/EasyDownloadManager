@@ -110,7 +110,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
                 holder.button.setText("下载出错，点击重新下载");
 //                holder.button.setTag("error");
                 holder.button.setTag(Status.status_error);
-                holder.button.setTag(cc.easyandroid.downloadprovider.R.id.xx,easyDownLoadInfo.getId());
+                holder.button.setTag(R.id.xxx, easyDownLoadInfo.getId());
             }
 
         } else {
@@ -137,11 +137,11 @@ public class MyAdapter extends BaseAdapter implements Observer {
                         EasyDownLoadManager.getInstance(context).getDownloadManager().enqueue(request);
                         break;
                     case Status.status_error:
-                        Long id = (Long) holder.button.getTag(cc.easyandroid.downloadprovider.R.id.xx);
+                        Long id = (Long) holder.button.getTag(R.id.xxx);
                         EasyDownLoadManager.getInstance(context).getDownloadManager().restartDownload(id);
                         break;
                     case Status.status_pause:
-                        Long id1 = (Long) holder.button.getTag(cc.easyandroid.downloadprovider.R.id.xx);
+                        Long id1 = (Long) holder.button.getTag(R.id.xxx);
                         EasyDownLoadManager.getInstance(context).getDownloadManager().resumeDownload(id1);
                         break;
                     case Status.status_wait:

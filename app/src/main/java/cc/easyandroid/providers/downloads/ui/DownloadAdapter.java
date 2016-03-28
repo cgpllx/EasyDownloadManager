@@ -16,12 +16,6 @@
 
 package cc.easyandroid.providers.downloads.ui;
 
-import java.text.DateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -39,6 +33,12 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 
 import cc.easyandroid.downloadprovider.R;
 import cc.easyandroid.providers.DownloadManager;
@@ -219,7 +219,7 @@ public class DownloadAdapter extends CursorAdapter {
 		PackageManager.MATCH_DEFAULT_ONLY);
 	if (list.size() == 0) {
 	    // no icon found for this mediatype. use "unknown" icon
-	    iconView.setImageResource(R.drawable.ic_download_misc_file_type);
+	    iconView.setImageResource(R.mipmap.ic_download_misc_file_type);
 	} else {
 	    Drawable icon = list.get(0).activityInfo.loadIcon(pm);
 	    iconView.setImageDrawable(icon);

@@ -167,6 +167,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
     public void update(Observable observable, Object data) {
         if (data instanceof HashMap) {
             mDownloadingTask = (HashMap<String, EasyDownLoadInfo>) data;
+            System.out.println("cgp=update");
             notifyItemData();
         }
     }

@@ -16,17 +16,6 @@
 
 package cc.easyandroid.providers.downloads;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.SyncFailedException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Locale;
-
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.FileUtils;
@@ -40,6 +29,16 @@ import com.squareup.okhttp.Call;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.SyncFailedException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Locale;
 
 /**
  * Runs an actual download
@@ -230,7 +229,7 @@ public class DownloadThread extends Thread {
         // connection at all
         checkConnectivity(state);
 
-        Response response = call.execute();
+        Response response = sendRequest(state,call);
         handleExceptionalStatus(state, innerState, response);
 
         if (Constants.LOGV) {
@@ -240,6 +239,22 @@ public class DownloadThread extends Thread {
         processResponseHeaders(state, innerState, response);
         InputStream entityStream = openResponseEntity(state, response);
         transferData(state, innerState, data, entityStream);
+    }
+
+    /**
+     * Send the request to the server, handling any I/O exceptions.
+     */
+    private Response sendRequest(State state, Call call) throws StopRequest {
+        try {
+            return call.execute();
+        } catch (IllegalArgumentException ex) {
+            throw new StopRequest(Downloads.STATUS_HTTP_DATA_ERROR,
+                    "while trying to execute request: " + ex.toString(), ex);
+        } catch (IOException ex) {
+            logNetworkState();
+            throw new StopRequest(getFinalStatusForHttpError(state),
+                    "while trying to execute request: " + ex.toString(), ex);
+        }
     }
 
     /**

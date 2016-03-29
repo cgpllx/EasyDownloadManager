@@ -56,7 +56,7 @@ public class EasyDownLoadManager extends Observable {
             mDataSetObserver = new MyDataSetObserver();
 
             refreshTask = new DbStatusRefreshTask(resolver);
-            baseQuery = new DownloadManager.Query();
+            baseQuery = new DownloadManager.Query().orderBy(DownloadManager.COLUMN_ID, DownloadManager.Query.ORDER_ASCENDING);
             startQuery();
         }
     }
@@ -117,7 +117,7 @@ public class EasyDownLoadManager extends Observable {
             infoItem.setLocal_uri(cursor.getString(mLocalUriId));
             infoItem.setTitle(cursor.getString(mTitleColumnId));
             infoItem.setUri(cursor.getString(mURIColumnId));
-
+            System.out.println("cgp--down--" + infoItem.getUri() + infoItem.getTitle() + "---" + infoItem.getStatus());
             mDownloadingList.put(infoItem.getUri() + infoItem.getTitle(), infoItem);
 //            System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
 //            System.out.println("cgp=refreshDownloadApp总大小=" + infoItem.getTotalBytes());

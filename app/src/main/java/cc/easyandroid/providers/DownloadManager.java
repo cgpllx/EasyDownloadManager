@@ -763,6 +763,8 @@ public class DownloadManager {
                 mOrderByColumn = Downloads.COLUMN_LAST_MODIFICATION;
             } else if (column.equals(COLUMN_TOTAL_SIZE_BYTES)) {
                 mOrderByColumn = Downloads.COLUMN_TOTAL_BYTES;
+            } else if (column.equals(COLUMN_ID)) {
+                mOrderByColumn = Downloads._ID;
             } else {
                 throw new IllegalArgumentException("Cannot order by " + column);
             }

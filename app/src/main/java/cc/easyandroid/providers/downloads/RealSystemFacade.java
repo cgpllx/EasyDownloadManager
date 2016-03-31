@@ -10,6 +10,8 @@ import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import cc.easyandroid.providers.core.EasyDownLoadConfig;
+
 class RealSystemFacade implements SystemFacade {
     private Context mContext;
     private NotificationManager mNotificationManager;
@@ -106,11 +108,10 @@ class RealSystemFacade implements SystemFacade {
 
     @Override
     public void startThread(Thread thread, boolean joinToThreadPool) {
-        thread.start();
-//        if (joinToThreadPool) {
-//            EasyDownLoadConfig.getThreadPoolExecutor().execute(thread);
-//        } else {
-//            thread.start();
-//        }
+        if (joinToThreadPool) {
+            EasyDownLoadConfig.getThreadPoolExecutor().execute(thread);
+        } else {
+            thread.start();
+        }
     }
 }

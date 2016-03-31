@@ -146,6 +146,7 @@ public class DownloadThread extends Thread {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
         State state = new State(mInfo);
+        Log.v(Constants.TAG, "cgp==mInfo===" + mInfo.mTotalBytes);
         PowerManager.WakeLock wakeLock = null;
         int finalStatus = Downloads.STATUS_UNKNOWN_ERROR;
 
@@ -170,6 +171,7 @@ public class DownloadThread extends Thread {
                 Request.Builder requestBuilder = new Request.Builder();
                 InnerState innerState = new InnerState();
                 setupDestinationFile(state, innerState);
+
                 addRequestHeaders(innerState, requestBuilder);
                 requestBuilder.url(state.mRequestUri);
 
@@ -839,6 +841,7 @@ public class DownloadThread extends Thread {
                                         + exc.toString(), exc);
                     }
                     innerState.mBytesSoFar = (int) fileLength;
+                    Log.v(Constants.TAG, "cgp==fileLength===" + fileLength);
                     if (mInfo.mTotalBytes != -1) {
                         innerState.mHeaderContentLength = Long
                                 .toString(mInfo.mTotalBytes);

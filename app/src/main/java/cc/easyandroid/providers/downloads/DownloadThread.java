@@ -148,7 +148,7 @@ public class DownloadThread extends Thread {
         State state = new State(mInfo);
         Log.v(Constants.TAG, "cgp==mInfo===" + mInfo.mTotalBytes);
         System.out.println("cgp= mInfo.mTotalBytes=" + mInfo.mTotalBytes);
-        System.out.println("cgp= mInfo.mUri="+ mInfo.mUri);
+        System.out.println("cgp= mInfo.mUri=" + mInfo.mUri);
         PowerManager.WakeLock wakeLock = null;
         int finalStatus = Downloads.STATUS_UNKNOWN_ERROR;
 
@@ -173,7 +173,10 @@ public class DownloadThread extends Thread {
                 Request.Builder requestBuilder = new Request.Builder();
                 InnerState innerState = new InnerState();
                 setupDestinationFile(state, innerState);
-
+                //检测文件是否已经下载完成了
+                if (mInfo.mTotalBytes != -1 && innerState.mBytesSoFar >= mInfo.mTotalBytes) {
+                    break;
+                }
                 addRequestHeaders(innerState, requestBuilder);
                 requestBuilder.url(state.mRequestUri);
 
@@ -233,7 +236,7 @@ public class DownloadThread extends Thread {
         // connection at all
         checkConnectivity(state);
 
-        Response response = sendRequest(state,call);
+        Response response = sendRequest(state, call);
         handleExceptionalStatus(state, innerState, response);
 
         if (Constants.LOGV) {

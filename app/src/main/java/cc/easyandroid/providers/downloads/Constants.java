@@ -16,9 +16,6 @@
 
 package cc.easyandroid.providers.downloads;
 
-import android.util.Config;
-import android.util.Log;
-
 /**
  * Contains the internal constants that are used in the download manager.
  * As a general rule, modifying these constants should be done with care.
@@ -139,8 +136,9 @@ public class Constants {
     /** Enable verbose logging - use with "setprop log.tag.DownloadManager VERBOSE" */
     private static final boolean LOCAL_LOGV = false;
     @SuppressWarnings("unused")
-    public static final boolean LOGV = Config.LOGV
-            || (Config.LOGD && LOCAL_LOGV && Log.isLoggable(TAG, Log.VERBOSE));
+//    public static final boolean LOGV = Config.LOGV
+//            || (Config.LOGD && LOCAL_LOGV && Log.isLoggable(TAG, Log.VERBOSE));
+    public static final boolean LOGV = true;
 
     /** Enable super-verbose logging */
     private static final boolean LOCAL_LOGVV = false;

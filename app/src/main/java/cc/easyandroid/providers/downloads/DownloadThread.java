@@ -147,6 +147,8 @@ public class DownloadThread extends Thread {
 
         State state = new State(mInfo);
         Log.v(Constants.TAG, "cgp==mInfo===" + mInfo.mTotalBytes);
+        System.out.println("cgp= mInfo.mTotalBytes=" + mInfo.mTotalBytes);
+        System.out.println("cgp= mInfo.mUri="+ mInfo.mUri);
         PowerManager.WakeLock wakeLock = null;
         int finalStatus = Downloads.STATUS_UNKNOWN_ERROR;
 
@@ -842,6 +844,8 @@ public class DownloadThread extends Thread {
                     }
                     innerState.mBytesSoFar = (int) fileLength;
                     Log.v(Constants.TAG, "cgp==fileLength===" + fileLength);
+                    System.out.println("cgp= fileLength=" + fileLength);
+                    System.out.println("cgp= mInfo.mUri=" + mInfo.mUri);
                     if (mInfo.mTotalBytes != -1) {
                         innerState.mHeaderContentLength = Long
                                 .toString(mInfo.mTotalBytes);

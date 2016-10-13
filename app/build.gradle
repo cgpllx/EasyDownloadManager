@@ -19,6 +19,8 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    //通知要用到
     provided 'com.android.support:appcompat-v7:22.2.0'
-    provided 'com.squareup.okhttp:okhttp:2.6.0'
+    provided 'com.squareup.okhttp3:okhttp:3.3.0'
+
 }

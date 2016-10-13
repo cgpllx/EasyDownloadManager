@@ -1,6 +1,7 @@
 package cc.easyandroid.providers.downloads;
 
-import com.squareup.okhttp.OkHttpClient;
+
+import okhttp3.OkHttpClient;
 
 /**
  * Created by geminiwen on 15/12/3.

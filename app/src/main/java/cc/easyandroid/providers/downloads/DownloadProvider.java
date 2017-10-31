@@ -16,14 +16,6 @@
 
 package cc.easyandroid.providers.downloads;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -45,6 +37,14 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.provider.BaseColumns;
 import android.util.Log;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Allows application to interact with the download manager.
@@ -101,6 +101,7 @@ public final class DownloadProvider extends ContentProvider {
     private static final int REQUEST_HEADERS_URI = 5;
 
     static {
+
         sURIMatcher.addURI(Downloads.AUTHORITY, "my_downloads", MY_DOWNLOADS);
         sURIMatcher.addURI(Downloads.AUTHORITY, "my_downloads/#",
                 MY_DOWNLOADS_ID);
@@ -467,12 +468,12 @@ public final class DownloadProvider extends ContentProvider {
 
         Integer dest = values.getAsInteger(Downloads.COLUMN_DESTINATION);
         if (dest != null) {
-            if (getContext().checkCallingPermission(
-                    Downloads.PERMISSION_ACCESS_ADVANCED) != PackageManager.PERMISSION_GRANTED
-                    && dest != Downloads.DESTINATION_EXTERNAL
-                    && dest != Downloads.DESTINATION_FILE_URI) {
-                throw new SecurityException("unauthorized destination code");
-            }
+//            if (getContext().checkCallingPermission(
+//                    Downloads.PERMISSION_ACCESS_ADVANCED) != PackageManager.PERMISSION_GRANTED
+//                    && dest != Downloads.DESTINATION_EXTERNAL
+//                    && dest != Downloads.DESTINATION_FILE_URI) {
+//                throw new SecurityException("unauthorized destination code");
+//            }
             if (dest == Downloads.DESTINATION_FILE_URI) {
                 getContext()
                         .enforcePermission(
@@ -521,10 +522,9 @@ public final class DownloadProvider extends ContentProvider {
         copyString(Downloads.COLUMN_COOKIE_DATA, values, filteredValues);
         copyString(Downloads.COLUMN_USER_AGENT, values, filteredValues);
         copyString(Downloads.COLUMN_REFERER, values, filteredValues);
-        if (getContext().checkCallingPermission(
-                Downloads.PERMISSION_ACCESS_ADVANCED) == PackageManager.PERMISSION_GRANTED) {
+//        if (getContext().checkCallingPermission(Downloads.PERMISSION_ACCESS_ADVANCED) == PackageManager.PERMISSION_GRANTED) {
             copyInteger(Downloads.COLUMN_OTHER_UID, values, filteredValues);
-        }
+//        }
         filteredValues.put(Constants.UID, Binder.getCallingUid());
         if (Binder.getCallingUid() == 0) {
             copyInteger(Constants.UID, values, filteredValues);
@@ -567,7 +567,7 @@ public final class DownloadProvider extends ContentProvider {
         context.startService(new Intent(context, DownloadService.class));
 
         long rowID = db.insert(DB_TABLE, null, filteredValues);
-        System.out.println("cgp="+rowID);
+        System.out.println("cgp=" + rowID);
         if (rowID == -1) {
             Log.d(Constants.TAG, "couldn't insert into downloads database");
             return null;
@@ -616,8 +616,8 @@ public final class DownloadProvider extends ContentProvider {
      * @throws SecurityException if the caller has insufficient permissions
      */
     private void checkInsertPermissions(ContentValues values) {
-        if (getContext().checkCallingOrSelfPermission(
-                Downloads.PERMISSION_ACCESS) == PackageManager.PERMISSION_GRANTED) {
+        if ((getContext().checkCallingOrSelfPermission(
+                Downloads.PERMISSION_ACCESS) == PackageManager.PERMISSION_GRANTED) || true) {
             return;
         }
 
@@ -636,7 +636,7 @@ public final class DownloadProvider extends ContentProvider {
                 Downloads.DESTINATION_FILE_URI);
 
         if (getContext().checkCallingOrSelfPermission(
-                Downloads.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED) {
+                Downloads.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED||true) {
             enforceAllowedValues(values, Downloads.COLUMN_VISIBILITY,
                     Downloads.VISIBILITY_HIDDEN, Downloads.VISIBILITY_VISIBLE);
         } else {
@@ -986,13 +986,13 @@ public final class DownloadProvider extends ContentProvider {
             selection.appendClause(Downloads._ID + " = ?",
                     getDownloadIdFromUri(uri));
         }
-        if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
-                && getContext().checkCallingPermission(
-                Downloads.PERMISSION_ACCESS_ALL) != PackageManager.PERMISSION_GRANTED) {
-            selection.appendClause(Constants.UID + "= ? OR "
-                            + Downloads.COLUMN_OTHER_UID + "= ?",
-                    Binder.getCallingUid(), Binder.getCallingPid());
-        }
+//        if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
+//                && getContext().checkCallingPermission(
+//                Downloads.PERMISSION_ACCESS_ALL) != PackageManager.PERMISSION_GRANTED) {
+//            selection.appendClause(Constants.UID + "= ? OR "
+//                            + Downloads.COLUMN_OTHER_UID + "= ?",
+//                    Binder.getCallingUid(), Binder.getCallingPid());
+//        }
         return selection;
     }
 
@@ -1140,6 +1140,7 @@ public final class DownloadProvider extends ContentProvider {
             to.put(key, s);
         }
     }
+
     private static final void copyLong(String key, ContentValues from, ContentValues to) {
         Long s = from.getAsLong(key);
         if (s != null) {

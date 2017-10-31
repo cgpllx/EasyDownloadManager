@@ -16,6 +16,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import cc.easyandroid.providers.DownloadManager;
 import cc.easyandroid.providers.downloads.Downloads;
+import okhttp3.OkHttpClient;
 
 /**
  *
@@ -47,18 +48,18 @@ public class EasyDownLoadManager extends Observable {
      * @param context
      */
     private EasyDownLoadManager(Context context) {
-        synchronized (this) {
-            mContext = context;
-            ContentResolver resolver = context.getContentResolver();
-            mDownloadManager = new DownloadManager(resolver, context.getPackageName());
-            mDownloadingList = new HashMap<>();
-            mChangeObserver = new ChangeObserver();
-            mDataSetObserver = new MyDataSetObserver();
+        mContext = context;
 
-            refreshTask = new DbStatusRefreshTask(resolver);
-            baseQuery = new DownloadManager.Query().orderBy(DownloadManager.COLUMN_ID, DownloadManager.Query.ORDER_ASCENDING);
-            startQuery();
-        }
+        System.out.println("   context.getPackageName()= " + context.getPackageName());
+        ContentResolver resolver = context.getContentResolver();
+        mDownloadManager = new DownloadManager(resolver, context.getPackageName());
+        mDownloadingList = new HashMap<>();
+        mChangeObserver = new ChangeObserver();
+        mDataSetObserver = new MyDataSetObserver();
+
+        refreshTask = new DbStatusRefreshTask(resolver);
+        baseQuery = new DownloadManager.Query().orderBy(DownloadManager.COLUMN_ID, DownloadManager.Query.ORDER_ASCENDING);
+        startQuery();
     }
 
     public DownloadManager getDownloadManager() {
@@ -67,7 +68,7 @@ public class EasyDownLoadManager extends Observable {
 
     private static EasyDownLoadManager mInstance;
 
-    public static EasyDownLoadManager getInstance(Context context) {
+    public static synchronized EasyDownLoadManager getInstance(Context context) {
         if (mInstance == null) {
             mInstance = new EasyDownLoadManager(context);
         }
@@ -289,9 +290,30 @@ public class EasyDownLoadManager extends Observable {
         }
     }
 
-    private static final ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(3);//下载app用的线程池
+    private final ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(3);//下载app用的线程池
 
-    public static void setCorePoolSize(int corePoolSize) {
+    public void setCorePoolSize(int corePoolSize) {
         threadPoolExecutor.setCorePoolSize(corePoolSize);
+    }
+
+    public ScheduledThreadPoolExecutor getThreadPoolExecutor() {
+        return threadPoolExecutor;
+    }
+
+    private OkHttpClient mOkHttpClient;
+
+    public void setOkHttpClient(OkHttpClient okHttpClient) {
+        this.mOkHttpClient = okHttpClient;
+    }
+
+    public OkHttpClient getOkHttpClient() {
+        if (mOkHttpClient == null) {
+            synchronized (EasyDownLoadManager.class) {
+                if (mOkHttpClient == null) {
+                    mOkHttpClient = new OkHttpClient();
+                }
+            }
+        }
+        return mOkHttpClient;
     }
 }

@@ -35,6 +35,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 
+import cc.easyandroid.providers.core.EasyDownLoadManager;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -48,13 +49,16 @@ public class DownloadThread extends Thread {
     private Context mContext;
     private DownloadInfo mInfo;
     private SystemFacade mSystemFacade;
-    private OkHttpClient mOkHttpClient = OKHttpClientInstance.getInstance().client();
+    private final OkHttpClient mOkHttpClient ;//
+//    private EasyDownLoadManager easyDownLoadManager;
 
     public DownloadThread(Context context, SystemFacade systemFacade,
                           DownloadInfo info) {
         mContext = context;
         mSystemFacade = systemFacade;
         mInfo = info;
+//        easyDownLoadManager=EasyDownLoadManager.getInstance(context);
+        mOkHttpClient=EasyDownLoadManager.getInstance(context).getOkHttpClient();
     }
 
     /**

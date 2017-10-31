@@ -10,7 +10,9 @@ import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import cc.easyandroid.providers.core.EasyDownLoadConfig;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
+import cc.easyandroid.providers.core.EasyDownLoadManager;
 
 class RealSystemFacade implements SystemFacade {
     private Context mContext;
@@ -20,9 +22,12 @@ class RealSystemFacade implements SystemFacade {
     // 1 GB
     private static final long DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE = 1024 * 1024 * 1024;
 
+    private final ScheduledThreadPoolExecutor threadPoolExecutor;
+
     public RealSystemFacade(Context context) {
         mContext = context;
         mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        threadPoolExecutor = EasyDownLoadManager.getInstance(context).getThreadPoolExecutor();
     }
 
     public long currentTimeMillis() {
@@ -109,7 +114,7 @@ class RealSystemFacade implements SystemFacade {
     @Override
     public void startThread(Thread thread, boolean joinToThreadPool) {
         if (joinToThreadPool) {
-            EasyDownLoadConfig.getThreadPoolExecutor().execute(thread);
+            threadPoolExecutor.execute(thread);
         } else {
             thread.start();
         }

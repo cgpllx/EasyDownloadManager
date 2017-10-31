@@ -3,24 +3,24 @@
     package="cc.easyandroid.downloadprovider">
 
     <!-- Allows access to the Download Manager -->
-    <permission
-        android:name="cc.easyandroid.permission.ACCESS_DOWNLOAD_MANAGER"
-        android:description="@string/permdesc_downloadManager"
-        android:label="@string/permlab_downloadManager"
-        android:protectionLevel="normal" />
+    <!--<permission-->
+        <!--android:name="cc.easyandroid.permission.ACCESS_DOWNLOAD_MANAGER"-->
+        <!--android:description="@string/permdesc_downloadManager"-->
+        <!--android:label="@string/permlab_downloadManager"-->
+        <!--android:protectionLevel="signature" />-->
 
-    <!-- Allows advanced access to the Download Manager -->
-    <permission
-        android:name="cc.easyandroid.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED"
-        android:description="@string/permdesc_downloadManagerAdvanced"
-        android:label="@string/permlab_downloadManagerAdvanced"
-        android:protectionLevel="normal" />
+    <!--&lt;!&ndash; Allows advanced access to the Download Manager &ndash;&gt;-->
+    <!--<permission-->
+        <!--android:name="cc.easyandroid.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED"-->
+        <!--android:description="@string/permdesc_downloadManagerAdvanced"-->
+        <!--android:label="@string/permlab_downloadManagerAdvanced"-->
+        <!--android:protectionLevel="signature" />-->
 
-    <!-- Allows to send broadcasts on download completion -->
-    <permission
-        android:name="cc.easyandroid.permission.SEND_DOWNLOAD_COMPLETED_INTENTS"
-        android:description="@string/permdesc_downloadCompletedIntent"
-        android:label="@string/permlab_downloadCompletedIntent"
-        android:protectionLevel="normal" />
+    <!--&lt;!&ndash; Allows to send broadcasts on download completion &ndash;&gt;-->
+    <!--<permission-->
+        <!--android:name="cc.easyandroid.permission.SEND_DOWNLOAD_COMPLETED_INTENTS"-->
+        <!--android:description="@string/permdesc_downloadCompletedIntent"-->
+        <!--android:label="@string/permlab_downloadCompletedIntent"-->
+        <!--android:protectionLevel="signature" />-->
 
 </manifest>

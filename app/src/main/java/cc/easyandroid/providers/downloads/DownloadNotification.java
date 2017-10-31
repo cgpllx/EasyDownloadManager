@@ -115,7 +115,10 @@ class DownloadNotification {
         mNotifications.clear();
         for (DownloadInfo download : downloads) {
             if (!isActiveAndVisible(download)) {
+             System.out.println("cgp test continue");
                 continue;
+            }else{
+                System.out.println("cgp test continue false");
             }
             String packageName = download.mPackage;
             long max = download.mTotalBytes;

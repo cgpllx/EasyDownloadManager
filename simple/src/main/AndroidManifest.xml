@@ -20,23 +20,23 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="cc.easyandroid.providers.downloads.ui.DownloadList"/>
+        <!--<activity android:name="cc.easyandroid.providers.downloads.ui.DownloadList"/>-->
 
-        <provider
-            android:name="cc.easyandroid.providers.downloads.DownloadProvider"
-            android:authorities="cc.easyandroid.downloadprovider" />
+        <!--<provider-->
+            <!--android:name="cc.easyandroid.providers.downloads.DownloadProvider"-->
+            <!--android:authorities="${AUTHORITY}" />-->
             <!--android:authorities="cc.easyandroid.downloads1" />-->
 
-        <service android:name="cc.easyandroid.providers.downloads.DownloadService" />
+        <!--<service android:name="cc.easyandroid.providers.downloads.DownloadService" />-->
 
-        <receiver
-            android:name="cc.easyandroid.providers.downloads.DownloadReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
+        <!--<receiver-->
+            <!--android:name="cc.easyandroid.providers.downloads.DownloadReceiver"-->
+            <!--android:exported="false">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.BOOT_COMPLETED" />-->
+                <!--<action android:name="android.net.conn.CONNECTIVITY_CHANGE" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
 
     </application>
 </manifest>

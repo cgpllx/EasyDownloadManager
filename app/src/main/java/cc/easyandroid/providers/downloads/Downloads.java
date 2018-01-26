@@ -19,23 +19,29 @@ package cc.easyandroid.providers.downloads;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import cc.easyandroid.downloadprovider.BuildConfig;
+
 /**
  * The Download Manager
  *
  * @pending
  */
 public final class Downloads implements BaseColumns {
-//    public static String AUTHORITY = R.string.app_name;
+//    public static String AUTHORITY = sss();
 
 
-//    public static final String AUTHORITY = BuildConfig.APPLICATION_ID;
+    public static String sss() {
+        return "";
+    }
+
+    public static final String AUTHORITY = BuildConfig.AUTHORITY + ".downloads";
 //
     /**
      * DownloadProvider authority
      * R.
      */
 
-    public static final String AUTHORITY = "cc.easyandroid.downloads1";
+//    public static final String AUTHORITY = "cc.easyandroid.downloads1";
 //    public static final String AUTHORITY = "cc.easyandroid.downloads1";
 
     /**

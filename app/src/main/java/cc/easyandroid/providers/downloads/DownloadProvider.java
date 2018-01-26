@@ -102,6 +102,7 @@ public final class DownloadProvider extends ContentProvider {
 
     static {
 
+
         sURIMatcher.addURI(Downloads.AUTHORITY, "my_downloads", MY_DOWNLOADS);
         sURIMatcher.addURI(Downloads.AUTHORITY, "my_downloads/#",
                 MY_DOWNLOADS_ID);

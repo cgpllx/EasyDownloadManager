@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin: 'com.novoda.bintray-release'
 android {
     compileSdkVersion 23
     buildToolsVersion '23.0.1'
@@ -11,7 +11,6 @@ android {
     }
 
     buildTypes {
-
         release {
             buildConfigField 'String','AUTHORITY',"\"${easyDownloadAuthority}\""
             manifestPlaceholders = [AUTHORITY:easyDownloadAuthority]
@@ -29,12 +28,34 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+    lintOptions {
+        abortOnError false
+    }
 }
-
+//如果你开源库中有中文注释在moudel的build.gradle加入格式
+allprojects {
+    repositories {
+        jcenter()
+    }
+    //加上这些
+    tasks.withType(Javadoc) {
+        options{ encoding "UTF-8"
+            charSet 'UTF-8'
+            links "http://docs.oracle.com/javase/7/docs/api"
+        }
+    }
+}
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     //通知要用到
     provided 'com.android.support:appcompat-v7:23.0.0'
     provided 'com.squareup.okhttp3:okhttp:3.3.0'
-
+}
+publish {
+    userOrg = 'cgpllx'      //bintray注册的用户名
+    groupId = 'cc.easyandroid'         //compile引用时的第1部分groupId
+    artifactId = 'EasyDownloadManager'     //compile引用时的第2部分项目名
+    publishVersion = '1.0.0'    //compile引用时的第3部分版本号
+    desc = 'Easy download'
+    website = 'https://github.com/cgpllx/EasyDownloadManager'
 }

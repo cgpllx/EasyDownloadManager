@@ -476,11 +476,12 @@ public final class DownloadProvider extends ContentProvider {
 //                throw new SecurityException("unauthorized destination code");
 //            }
             if (dest == Downloads.DESTINATION_FILE_URI) {
-                getContext()
-                        .enforcePermission(
-                                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                Binder.getCallingPid(), Binder.getCallingUid(),
-                                "need WRITE_EXTERNAL_STORAGE permission to use DESTINATION_FILE_URI");
+//                屏蔽检测权限，实用不需要权限的路径
+//                getContext()
+//                        .enforcePermission(
+//                                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//                                Binder.getCallingPid(), Binder.getCallingUid(),
+//                                "need WRITE_EXTERNAL_STORAGE permission to use DESTINATION_FILE_URI");
                 checkFileUriDestination(values);
             }
             filteredValues.put(Downloads.COLUMN_DESTINATION, dest);

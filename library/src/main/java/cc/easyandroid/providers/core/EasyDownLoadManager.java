@@ -89,13 +89,11 @@ public class EasyDownLoadManager extends Observable {
 
 
     /*
-    * 刷新正在下载中的应用
-    */
+     * 刷新正在下载中的应用
+     */
     private void refreshDownloadApp(Cursor cursor) {
-        if (cursor.getCount() > 0) {
-            // 检索有结果
-            mDownloadingList = new HashMap<>();
-        } else {
+        mDownloadingList = new HashMap<>();
+        if (cursor.getCount() <= 0) {
             return;
         }
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {

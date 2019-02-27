@@ -185,6 +185,7 @@ public class DownloadReceiver extends BroadcastReceiver {
     }
 
     private void startService(Context context) {
-        context.startService(new Intent(context, DownloadService.class));
+       // context.startService(new Intent(context, DownloadService.class));
+        //TODO 先屏蔽。後期改進
     }
 }

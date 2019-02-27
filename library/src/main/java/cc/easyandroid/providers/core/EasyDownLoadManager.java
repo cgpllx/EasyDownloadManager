@@ -49,8 +49,6 @@ public class EasyDownLoadManager extends Observable {
      */
     private EasyDownLoadManager(Context context) {
         mContext = context;
-
-        System.out.println("   context.getPackageName()= " + context.getPackageName());
         ContentResolver resolver = context.getContentResolver();
         mDownloadManager = new DownloadManager(resolver, context.getPackageName());
         mDownloadingList = new HashMap<>();
@@ -118,14 +116,9 @@ public class EasyDownLoadManager extends Observable {
             infoItem.setUri(cursor.getString(mURIColumnId));
             System.out.println("cgp--down--" + infoItem.getUri() + infoItem.getTitle() + "---" + infoItem.getStatus());
             mDownloadingList.put(infoItem.getUri() + infoItem.getTitle(), infoItem);
-//            System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
-//            System.out.println("cgp=refreshDownloadApp总大小=" + infoItem.getTotalBytes());
             if (DownloadManager.isStatusRunning(infoItem.getStatus())) {//正在下载
-                // downloading progress
-//                System.out.println("cgp=refreshDownloadApp=" + infoItem.getCurrentBytes());
             } else if (DownloadManager.isStatusPending(infoItem.getStatus())) {//等待
                 // 下载等待中
-
             } else if (infoItem.getStatus() == DownloadManager.STATUS_SUCCESSFUL) {// 下载完成
                 // download success
                 // 检查文件完整性，如果不存在，删除此条记录
@@ -211,7 +204,9 @@ public class EasyDownLoadManager extends Observable {
 
             switch (token) {
                 case DOWNLOAD:
-                    changeCursor(new DownloadManager.CursorTranslator(cursor, Downloads.CONTENT_URI));
+                    if (cursor != null) {
+                        changeCursor(new DownloadManager.CursorTranslator(cursor, Downloads.CONTENT_URI));
+                    }
                     break;
                 default:
                     break;

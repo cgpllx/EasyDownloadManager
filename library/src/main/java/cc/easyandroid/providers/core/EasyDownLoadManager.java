@@ -47,7 +47,7 @@ public class EasyDownLoadManager extends Observable {
      *
      * @param context
      */
-    private EasyDownLoadManager(Context context) {
+    protected EasyDownLoadManager(Context context) {
         mContext = context;
         ContentResolver resolver = context.getContentResolver();
         mDownloadManager = new DownloadManager(resolver, context.getPackageName());
@@ -56,8 +56,12 @@ public class EasyDownLoadManager extends Observable {
         mDataSetObserver = new MyDataSetObserver();
 
         refreshTask = new DbStatusRefreshTask(resolver);
-        baseQuery = new DownloadManager.Query().orderBy(DownloadManager.COLUMN_ID, DownloadManager.Query.ORDER_ASCENDING);
+        baseQuery = onCreatQuery();
         startQuery();
+    }
+
+    protected DownloadManager.Query onCreatQuery() {
+        return new DownloadManager.Query().orderBy(DownloadManager.COLUMN_ID, DownloadManager.Query.ORDER_ASCENDING);
     }
 
     public DownloadManager getDownloadManager() {

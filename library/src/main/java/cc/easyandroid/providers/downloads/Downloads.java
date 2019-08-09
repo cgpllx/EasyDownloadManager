@@ -29,7 +29,7 @@ import cc.easyandroid.downloadprovider.BuildConfig;
 public final class Downloads implements BaseColumns {
 
 
-    public static   String AUTHORITY = BuildConfig.AUTHORITY + ".downloads";
+    public static final String AUTHORITY = BuildConfig.AUTHORITY + ".downloads";
     /**
      * @hide
      */

@@ -16,11 +16,13 @@
 
 package cc.easyandroid.providers.downloads;
 
+import android.app.job.JobParameters;
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -49,16 +51,30 @@ public class DownloadThread extends Thread {
     private Context mContext;
     private DownloadInfo mInfo;
     private SystemFacade mSystemFacade;
-    private final OkHttpClient mOkHttpClient ;//
+    private final OkHttpClient mOkHttpClient;//
 //    private EasyDownLoadManager easyDownLoadManager;
 
-    public DownloadThread(Context context, SystemFacade systemFacade,
-                          DownloadInfo info) {
-        mContext = context;
-        mSystemFacade = systemFacade;
+//    public DownloadThread(Context context, SystemFacade systemFacade,
+//                          DownloadInfo info) {
+//        mContext = context;
+//        mSystemFacade = systemFacade;
+//        mInfo = info;
+////        easyDownLoadManager=EasyDownLoadManager.getInstance(context);
+//        mOkHttpClient = EasyDownLoadManager.getInstance(context).getOkHttpClient();
+//    }
+
+    private final DownloadJobService mJobService;
+    private final JobParameters mParams;
+
+    public DownloadThread(DownloadJobService service, JobParameters params, DownloadInfo info) {
+        mContext = service;
+        mSystemFacade = Helpers.getSystemFacade(mContext);
+
+        mJobService = service;
+        mParams = params;
+
         mInfo = info;
-//        easyDownLoadManager=EasyDownLoadManager.getInstance(context);
-        mOkHttpClient=EasyDownLoadManager.getInstance(context).getOkHttpClient();
+        mOkHttpClient = EasyDownLoadManager.getInstance(service).getOkHttpClient();
     }
 
     /**
@@ -160,7 +176,7 @@ public class DownloadThread extends Thread {
             PowerManager pm = (PowerManager) mContext
                     .getSystemService(Context.POWER_SERVICE);
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    Constants.TAG);
+                    Constants.TAG + ":");
             wakeLock.acquire();
 
             if (Constants.LOGV) {
@@ -228,6 +244,17 @@ public class DownloadThread extends Thread {
                     state.mNewUri, state.mMimeType);
             mInfo.mHasActiveThread = false;
         }
+        boolean needsReschedule = false;
+        if (Downloads.isStatusCompleted(mInfo.mStatus)) {
+        } else if (mInfo.mStatus == Downloads.STATUS_WAITING_TO_RETRY
+                || mInfo.mStatus == Downloads.STATUS_WAITING_FOR_NETWORK
+                || mInfo.mStatus == Downloads.STATUS_QUEUED_FOR_WIFI
+        ) {
+            needsReschedule = true;
+        }
+        System.out.println("cgp needsReschedule mInfo.mStatus =  " +mInfo.mStatus);
+        System.out.println("cgp needsReschedule=  " +needsReschedule);
+        mJobService.jobFinishedInternal(mParams, needsReschedule);
     }
 
     /**
@@ -299,8 +326,14 @@ public class DownloadThread extends Thread {
     private void transferData(State state, InnerState innerState, byte[] data,
                               InputStream entityStream) throws StopRequest {
         for (; ; ) {
+            if (mShutdownRequested) {
+                throw new StopRequest(Downloads.STATUS_HTTP_DATA_ERROR,
+                        "Local halt requested; job probably timed out");
+
+            }
             int bytesRead = readFromResponse(state, innerState, data,
                     entityStream);
+
             if (bytesRead == -1) { // success, end of stream already reached
                 handleEndOfStream(state, innerState);
                 return;
@@ -947,5 +980,14 @@ public class DownloadThread extends Thread {
         } catch (NullPointerException npe) {
             return null;
         }
+    }
+
+    /**
+     * Flag indicating that thread must be halted
+     */
+    private volatile boolean mShutdownRequested;
+
+    public void requestShutdown() {
+        mShutdownRequested = true;
     }
 }

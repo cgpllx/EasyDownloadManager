@@ -42,7 +42,7 @@ import cc.easyandroid.providers.DownloadManager;
 /**
  * Stores information about an individual download.
  */
-public class DownloadInfo {
+public class DownloadInfo111 {
     public static class Reader {
         private ContentResolver mResolver;
         private Cursor mCursor;
@@ -54,14 +54,14 @@ public class DownloadInfo {
             mCursor = cursor;
         }
 
-        public DownloadInfo newDownloadInfo(Context context, SystemFacade systemFacade) {
-            DownloadInfo info = new DownloadInfo(context);
+        public DownloadInfo111 newDownloadInfo(Context context, SystemFacade systemFacade) {
+            DownloadInfo111 info = new DownloadInfo111(context);
             updateFromDatabase(info);
             readRequestHeaders(info);
             return info;
         }
 
-        public void updateFromDatabase(DownloadInfo info) {
+        public void updateFromDatabase(DownloadInfo111 info) {
             info.mId = getLong(Downloads._ID);
             info.mUri = getString(info.mUri, Downloads.COLUMN_URI);
             info.mNoIntegrity = getInt(Downloads.COLUMN_NO_INTEGRITY) == 1;
@@ -98,7 +98,7 @@ public class DownloadInfo {
             }
         }
 
-        private void readRequestHeaders(DownloadInfo info) {
+        private void readRequestHeaders(DownloadInfo111 info) {
             info.mRequestHeaders.clear();
             Uri headerUri = Uri.withAppendedPath(
                     info.getAllDownloadsUri(), Downloads.RequestHeaders.URI_SEGMENT);
@@ -123,7 +123,7 @@ public class DownloadInfo {
             }
         }
 
-        private void addHeader(DownloadInfo info, String header, String value) {
+        private void addHeader(DownloadInfo111 info, String header, String value) {
             info.mRequestHeaders.add(Pair.create(header, value));
         }
 
@@ -246,9 +246,9 @@ public class DownloadInfo {
     private SystemFacade mSystemFacade;
     private Context mContext;
 
-    public DownloadInfo(Context context ) {
+    private DownloadInfo111(Context context) {
         mContext = context;
-        mSystemFacade = Helpers.getSystemFacade(context);
+        mSystemFacade = mSystemFacade;
         mFuzz = Helpers.sRandom.nextInt(1001);
     }
 
@@ -639,13 +639,13 @@ public class DownloadInfo {
         }
         return JobInfo.NETWORK_TYPE_ANY;
     }
-    public static DownloadInfo queryDownloadInfo(Context context, long downloadId) {
+    public static DownloadInfo111 queryDownloadInfo(Context context, long downloadId) {
         final ContentResolver resolver = context.getContentResolver();
         try (Cursor cursor = resolver.query(
                 ContentUris.withAppendedId(Downloads.ALL_DOWNLOADS_CONTENT_URI, downloadId),
                 null, null, null, null)) {
             final Reader reader = new Reader(resolver, cursor);
-            final DownloadInfo info = new DownloadInfo(context);
+            final DownloadInfo111 info = new DownloadInfo111(context);
             if (cursor.moveToFirst()) {
                 reader.updateFromDatabase(info);
                 reader.readRequestHeaders(info);

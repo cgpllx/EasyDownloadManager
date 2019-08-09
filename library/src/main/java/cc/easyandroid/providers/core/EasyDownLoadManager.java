@@ -16,6 +16,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import cc.easyandroid.providers.DownloadManager;
 import cc.easyandroid.providers.downloads.Downloads;
+import cc.easyandroid.providers.downloads.Helpers;
 import okhttp3.OkHttpClient;
 
 /**
@@ -57,7 +58,15 @@ public class EasyDownLoadManager extends Observable {
 
         refreshTask = new DbStatusRefreshTask(resolver);
         baseQuery = onCreatQuery();
+
         startQuery();
+        Helpers.getAsyncHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                Helpers.handleBootCompleted(mContext);
+
+            }
+        });
     }
 
     protected DownloadManager.Query onCreatQuery() {
@@ -87,6 +96,7 @@ public class EasyDownLoadManager extends Observable {
 
     private void startQuery() {
         mDownloadManager.query(refreshTask, DbStatusRefreshTask.DOWNLOAD, null, baseQuery);//异步查询
+
     }
 
 
@@ -118,7 +128,7 @@ public class EasyDownLoadManager extends Observable {
             infoItem.setLocal_uri(cursor.getString(mLocalUriId));
             infoItem.setTitle(cursor.getString(mTitleColumnId));
             infoItem.setUri(cursor.getString(mURIColumnId));
-            System.out.println("cgp--down--" + infoItem.getUri() + infoItem.getTitle() + "---" + infoItem.getStatus());
+            //System.out.println("cgp--down--" + infoItem.getUri() + infoItem.getTitle() + "---" + infoItem.getLocal_uri());
             mDownloadingList.put(infoItem.getUri() + infoItem.getTitle(), infoItem);
             if (DownloadManager.isStatusRunning(infoItem.getStatus())) {//正在下载
             } else if (DownloadManager.isStatusPending(infoItem.getStatus())) {//等待
@@ -287,15 +297,15 @@ public class EasyDownLoadManager extends Observable {
         }
     }
 
-    private final ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(3);//下载app用的线程池
-
-    public void setCorePoolSize(int corePoolSize) {
-        threadPoolExecutor.setCorePoolSize(corePoolSize);
-    }
-
-    public ScheduledThreadPoolExecutor getThreadPoolExecutor() {
-        return threadPoolExecutor;
-    }
+//    private final ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(3);//下载app用的线程池
+//
+//    public void setCorePoolSize(int corePoolSize) {
+//        threadPoolExecutor.setCorePoolSize(corePoolSize);
+//    }
+//
+//    public ScheduledThreadPoolExecutor getThreadPoolExecutor() {
+//        return threadPoolExecutor;
+//    }
 
     private OkHttpClient mOkHttpClient;
 

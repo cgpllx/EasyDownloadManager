@@ -92,6 +92,8 @@ public class MyAdapter extends BaseAdapter implements Observer {
 
         if (mDownloadingTask != null && mDownloadingTask.containsKey(key)) {
             EasyDownLoadInfo easyDownLoadInfo = mDownloadingTask.get(key);
+           //System.out.println( "cgp "+easyDownLoadInfo.getLocal_uri());
+            holder.button.setTag(R.id.xxx, easyDownLoadInfo.getId());
             holder.progress_text.setText(easyDownLoadInfo.getStatus() + "下载的大小＝" + easyDownLoadInfo.getCurrentBytes());
             if (DownloadManager.isStatusRunning(easyDownLoadInfo.getStatus())) {//正在下载
             } else if (DownloadManager.isStatusPending(easyDownLoadInfo.getStatus())) {//等待
@@ -112,7 +114,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
                 holder.button.setText("下载出错，点击重新下载");
 //                holder.button.setTag("error");
                 holder.button.setTag(Status.status_error);
-                holder.button.setTag(R.id.xxx, easyDownLoadInfo.getId());
+
             }
 
         } else {
@@ -170,7 +172,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
     public void update(Observable observable, Object data) {
         if (data instanceof HashMap) {
             mDownloadingTask = (HashMap<String, EasyDownLoadInfo>) data;
-            System.out.println("cgp=update");
+            //System.out.println("cgp=update");
             notifyItemData();
         }
     }

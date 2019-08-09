@@ -14,6 +14,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+import cc.easyandroid.downloadprovider.BuildConfig;
 import cc.easyandroid.providers.DownloadManager;
 import cc.easyandroid.providers.downloads.Downloads;
 import cc.easyandroid.providers.downloads.Helpers;
@@ -50,6 +51,10 @@ public class EasyDownLoadManager extends Observable {
      */
     protected EasyDownLoadManager(Context context) {
         mContext = context;
+//        mContext.getApplicationInfo().m
+//        context.getAssets().
+//                context.getPackageName()
+
         ContentResolver resolver = context.getContentResolver();
         mDownloadManager = new DownloadManager(resolver, context.getPackageName());
         mDownloadingList = new HashMap<>();
@@ -59,12 +64,12 @@ public class EasyDownLoadManager extends Observable {
         refreshTask = new DbStatusRefreshTask(resolver);
         baseQuery = onCreatQuery();
 
+
         startQuery();
         Helpers.getAsyncHandler().post(new Runnable() {
             @Override
             public void run() {
                 Helpers.handleBootCompleted(mContext);
-
             }
         });
     }
@@ -296,16 +301,6 @@ public class EasyDownLoadManager extends Observable {
             notifyDataSetInvalidated();
         }
     }
-
-//    private final ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(3);//下载app用的线程池
-//
-//    public void setCorePoolSize(int corePoolSize) {
-//        threadPoolExecutor.setCorePoolSize(corePoolSize);
-//    }
-//
-//    public ScheduledThreadPoolExecutor getThreadPoolExecutor() {
-//        return threadPoolExecutor;
-//    }
 
     private OkHttpClient mOkHttpClient;
 

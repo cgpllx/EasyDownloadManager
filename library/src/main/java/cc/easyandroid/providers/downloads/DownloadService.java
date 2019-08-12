@@ -103,7 +103,7 @@ public class DownloadService extends Service {
      * Returns an IBinder instance when someone wants to connect to this
      * service. Binding to this service is not allowed.
      *
-     * @throws UnsupportedOperationException
+     * @throws
      */
     public IBinder onBind(Intent i) {
         throw new UnsupportedOperationException(

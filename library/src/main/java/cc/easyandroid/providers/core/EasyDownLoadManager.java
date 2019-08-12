@@ -3,6 +3,8 @@ package cc.easyandroid.providers.core;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DataSetObserver;
@@ -51,9 +53,6 @@ public class EasyDownLoadManager extends Observable {
      */
     protected EasyDownLoadManager(Context context) {
         mContext = context;
-//        mContext.getApplicationInfo().m
-//        context.getAssets().
-//                context.getPackageName()
 
         ContentResolver resolver = context.getContentResolver();
         mDownloadManager = new DownloadManager(resolver, context.getPackageName());

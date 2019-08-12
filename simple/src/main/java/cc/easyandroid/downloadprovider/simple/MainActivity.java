@@ -18,8 +18,8 @@ public class MainActivity extends  Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(cc.easyandroid.downloadprovider.R.layout.activity_main);
-        listView = (ListView) findViewById(cc.easyandroid.downloadprovider.R.id.listview);
+        setContentView( R.layout.activity_main);
+        listView = (ListView) findViewById( R.id.listview);
         adapter = new MyAdapter(this);
         EasyDownLoadManager.getInstance(this).addObserver(adapter);
         listView.setAdapter(adapter);

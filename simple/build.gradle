@@ -10,6 +10,14 @@ android {
     }
     buildTypes {
         release {
+            buildConfigField 'String','AUTHORITY',"\"${easyDownloadAuthority}\""
+            manifestPlaceholders = [AUTHORITY:easyDownloadAuthority]
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+        debug {
+            buildConfigField 'String','AUTHORITY',"\"${easyDownloadAuthority}\""
+            manifestPlaceholders = [AUTHORITY: easyDownloadAuthority]
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }

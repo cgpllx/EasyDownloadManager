@@ -823,13 +823,12 @@ public class Helpers {
         if (latency > 0) {
             builder.setMinimumLatency(latency);
         }
-
+        builder.setMinimumLatency(1);
         // We always require a network, but the type of network might be further
         // restricted based on download request or user override
         builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
 //        builder.setRequiresCharging(true);//充电下载
 //        builder.setRequiresDeviceIdle(true);// idle
-
 
         // If package name was filtered during insert (probably due to being
         // invalid), blame based on the requesting UID instead
@@ -838,7 +837,7 @@ public class Helpers {
 //            packageName = context.getPackageManager().getPackagesForUid(info.mUid)[0];
 //        }
        int ddd= scheduler.schedule(builder.build());
-//        scheduler.scheduleAsPackage(builder.build(), packageName, UserHandle.myUserId(), TAG);
+       System.out.println("cgp scheduleJob ddd="+ddd);
         return true;
     }
     public static void scheduleJob(Context context, long downloadId) {

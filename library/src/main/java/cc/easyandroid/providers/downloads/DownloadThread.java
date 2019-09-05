@@ -52,16 +52,6 @@ public class DownloadThread extends Thread {
     private DownloadInfo mInfo;
     private SystemFacade mSystemFacade;
     private final OkHttpClient mOkHttpClient;//
-//    private EasyDownLoadManager easyDownLoadManager;
-
-//    public DownloadThread(Context context, SystemFacade systemFacade,
-//                          DownloadInfo info) {
-//        mContext = context;
-//        mSystemFacade = systemFacade;
-//        mInfo = info;
-////        easyDownLoadManager=EasyDownLoadManager.getInstance(context);
-//        mOkHttpClient = EasyDownLoadManager.getInstance(context).getOkHttpClient();
-//    }
 
     private final DownloadJobService mJobService;
     private final JobParameters mParams;
@@ -74,8 +64,10 @@ public class DownloadThread extends Thread {
         mParams = params;
 
         mInfo = info;
+       // info.startIfReady(mSystemFacade.currentTimeMillis());
         mOkHttpClient = EasyDownLoadManager.getInstance(service).getOkHttpClient();
     }
+
 
     /**
      * Returns the user agent provided by the initiating app, or use the default
@@ -252,8 +244,8 @@ public class DownloadThread extends Thread {
         ) {
             needsReschedule = true;
         }
-        System.out.println("cgp needsReschedule mInfo.mStatus =  " +mInfo.mStatus);
-        System.out.println("cgp needsReschedule=  " +needsReschedule);
+//        System.out.println("cgp needsReschedule mInfo.mStatus =  " +mInfo.mStatus);
+//        System.out.println("cgp needsReschedule=  " +needsReschedule);
         mJobService.jobFinishedInternal(mParams, needsReschedule);
     }
 
@@ -265,7 +257,8 @@ public class DownloadThread extends Thread {
         byte data[] = new byte[Constants.BUFFER_SIZE];
 
 
-        // check just before sending the request to avoid using an invalid
+        // check just before sending the request to av
+        // oid using an invalid
         // connection at all
         checkConnectivity(state);
 
@@ -435,6 +428,7 @@ public class DownloadThread extends Thread {
     private void checkPausedOrCanceled(State state) throws StopRequest {
         synchronized (mInfo) {
             if (mInfo.mControl == Downloads.CONTROL_PAUSED) {
+                System.out.println("cgp download thread mInfo.mControl="+mInfo.mControl);
                 throw new StopRequest(Downloads.STATUS_PAUSED_BY_APP,
                         "download paused by owner");
             }

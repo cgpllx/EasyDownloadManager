@@ -59,7 +59,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null || convertView.getTag() == null) {
-            convertView = LayoutInflater.from(context).inflate(cc.easyandroid.downloadprovider.R.layout.item, parent, false);
+            convertView = LayoutInflater.from(context).inflate(R.layout.item, parent, false);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
         } else {
@@ -96,9 +96,12 @@ public class MyAdapter extends BaseAdapter implements Observer {
             holder.button.setTag(R.id.xxx, easyDownLoadInfo.getId());
             holder.progress_text.setText(easyDownLoadInfo.getStatus() + "下载的大小＝" + easyDownLoadInfo.getCurrentBytes());
             if (DownloadManager.isStatusRunning(easyDownLoadInfo.getStatus())) {//正在下载
+                holder.button.setTag(Status.status_downloading);
+                holder.button.setText("正在下载");
             } else if (DownloadManager.isStatusPending(easyDownLoadInfo.getStatus())) {//等待
                 // 下载等待中
                 holder.button.setTag(Status.status_wait);
+                holder.button.setText("下载等待...");
             } else if (easyDownLoadInfo.getStatus() == DownloadManager.STATUS_SUCCESSFUL) {// 下载完成
                 holder.button.setTag(Status.status_successful);
                 holder.button.setText("下载完成");
@@ -109,12 +112,17 @@ public class MyAdapter extends BaseAdapter implements Observer {
                 }
             } else if (easyDownLoadInfo.getStatus() == DownloadManager.STATUS_PAUSED) {// 暂停 //
                 holder.button.setTag(Status.status_pause);
-            } else {
+                holder.button.setText("下载暂停.le");
+            } else if(easyDownLoadInfo.getStatus() == DownloadManager.STATUS_FAILED){
                 System.out.println("下载出错");
                 holder.button.setText("下载出错，点击重新下载");
 //                holder.button.setTag("error");
                 holder.button.setTag(Status.status_error);
 
+            }else{
+                holder.button.setText("点击下载");
+//                holder.button.setTag("error");
+                holder.button.setTag(Status.status_default);
             }
 
         } else {
@@ -139,21 +147,27 @@ public class MyAdapter extends BaseAdapter implements Observer {
                         request.setDestinationInExternalPublicDir(
                                 Environment.DIRECTORY_DOWNLOADS, "/");
                         request.setDescription("Just for test");
-                        EasyDownLoadManager.getInstance(context).getDownloadManager().enqueue(request);
+                        EasyDownLoadManager.getInstance(context).enqueue(request);
                         break;
                     case Status.status_error:
                         Long id = (Long) holder.button.getTag(R.id.xxx);
-                        EasyDownLoadManager.getInstance(context).getDownloadManager().restartDownload(id);
+                        EasyDownLoadManager.getInstance(context).restartDownload(id);
                         break;
                     case Status.status_pause:
                         Long id1 = (Long) holder.button.getTag(R.id.xxx);
-                        EasyDownLoadManager.getInstance(context).getDownloadManager().resumeDownload(id1);
+                        EasyDownLoadManager.getInstance(context).resumeDownload(id1);
                         break;
                     case Status.status_wait:
+                        Long wait = (Long) holder.button.getTag(R.id.xxx);
+                        EasyDownLoadManager.getInstance(context).pauseDownload(wait);
                         break;
                     case Status.status_successful:
 
                         break;
+                        case Status.status_downloading:
+                            Long idd = (Long) holder.button.getTag(R.id.xxx);
+                            EasyDownLoadManager.getInstance(context).pauseDownload(idd);
+                            break;
                 }
 
             }
@@ -166,6 +180,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
         int status_pause = 1 << 2;
         int status_wait = 1 << 3;
         int status_successful = 1 << 4;
+        int status_downloading = 1 << 5;
     }
 
     @Override
@@ -204,9 +219,9 @@ public class MyAdapter extends BaseAdapter implements Observer {
 
     class ViewHolder {
         public ViewHolder(View view) {
-            button = (Button) view.findViewById(cc.easyandroid.downloadprovider.R.id.button);
-            progress_text = (TextView) view.findViewById(cc.easyandroid.downloadprovider.R.id.progress_text);
-            progressBar = (ProgressBar) view.findViewById(cc.easyandroid.downloadprovider.R.id.progressBar);
+            button = (Button) view.findViewById( R.id.button);
+            progress_text = (TextView) view.findViewById( R.id.progress_text);
+            progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         }
 
         Button button;

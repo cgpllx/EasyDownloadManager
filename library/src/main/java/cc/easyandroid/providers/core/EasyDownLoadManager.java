@@ -1,16 +1,23 @@
 package cc.easyandroid.providers.core;
 
+import android.Manifest;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DataSetObserver;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
+import android.widget.Toast;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
@@ -20,6 +27,7 @@ import cc.easyandroid.downloadprovider.BuildConfig;
 import cc.easyandroid.providers.DownloadManager;
 import cc.easyandroid.providers.downloads.Downloads;
 import cc.easyandroid.providers.downloads.Helpers;
+import cc.easyandroid.providers.permissions.PermissionsUtil;
 import okhttp3.OkHttpClient;
 
 /**
@@ -89,6 +97,84 @@ public class EasyDownLoadManager extends Observable {
         }
         return mInstance;
     }
+
+
+    public void enqueue(final DownloadManager.Request request) {
+        executePer(() -> getDownloadManager().enqueue(request));
+    }
+
+    public void restartDownload(long... ids) {
+        try {
+            executePer(() -> getDownloadManager().restartDownload(ids));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void resumeDownload(long... ids) {
+        try {
+            executePer(() -> getDownloadManager().resumeDownload(ids));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void pauseDownload(long... ids) {
+        try {
+            getDownloadManager().pauseDownload(ids);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+    @FunctionalInterface
+    public interface Command {
+        void doExecute();
+    }
+
+    public void executePer(final Command command) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            command.doExecute();
+            return;
+        }
+       PermissionsUtil.OnPermissionListener _permissionListener =null;
+        if (_permissionListener == null) {
+            _permissionListener = new PermissionsUtil.OnPermissionListener() {
+                @Override
+                public void onPermissionGranted(String[] permissions) {
+                    boolean show = false;
+                    for (String permission : permissions) {
+                        if (permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                            show = true;
+                            break;
+                        }
+                    }
+                    if (!show) return;
+                    command.doExecute();
+                }
+
+                @Override
+                public void onPermissionDenied(String[] permissions) {
+                    //
+                }
+
+                @Override
+                public void onShouldShowRequestPermissionRationale(final String[] permissions) {
+                    Toast.makeText(mContext, "You denied the Read/Write permissions on SDCard.",
+                            Toast.LENGTH_LONG).show();
+                }
+            };
+        }
+
+        final String[] permissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        PermissionsUtil.checkPermissions(mContext, _permissionListener, permissions);
+    }
+
+
+    PermissionsUtil.OnPermissionListener _permissionListener;
 
     @Override
     public void addObserver(Observer observer) {
@@ -251,12 +337,12 @@ public class EasyDownLoadManager extends Observable {
             mDownloadingCursor = null;
         }
         deleteObservers();
-        mInstance = null;
     }
 
     public static void destroy() {
         if (mInstance != null) {
             mInstance.close();
+            mInstance = null;
         }
     }
 

@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application>
+        <activity
+            android:name="cc.easyandroid.providers.permissions.PermissionActivity"
+            android:label=""
+            android:theme="@style/Theme.Transparent"/>
         <provider
             android:name="cc.easyandroid.providers.downloads.DownloadProvider"
             android:authorities="${AUTHORITY}.downloads" />

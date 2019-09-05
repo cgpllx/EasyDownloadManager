@@ -11,7 +11,7 @@ import java.util.List;
 
 import cc.easyandroid.providers.core.EasyDownLoadManager;
 
-public class MainActivity extends  Activity {
+public class MainActivity extends  AppCompatActivity {
     ListView listView;
     MyAdapter adapter;
 
@@ -34,44 +34,7 @@ public class MainActivity extends  Activity {
         urls.add("http://down.mumayi.com/41052/mbaidu");
         urls.add("http://down.mumayi.com/41052/mbaidu");
         urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
-        urls.add("http://down.mumayi.com/41052/mbaidu");
+
         adapter.setIVisiblePosition(new IVisiblePosition() {
             @Override
             public int getFirstVisiblePosition() {

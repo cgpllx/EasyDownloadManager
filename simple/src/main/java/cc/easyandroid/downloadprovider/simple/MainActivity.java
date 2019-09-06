@@ -1,6 +1,7 @@
 package cc.easyandroid.downloadprovider.simple;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cc.easyandroid.providers.core.EasyDownLoadManager;
+import cc.easyandroid.providers.downloads.DownloadService;
 
 public class MainActivity extends  AppCompatActivity {
     ListView listView;
@@ -53,6 +55,7 @@ public class MainActivity extends  AppCompatActivity {
                 return listView.getChildAt((position - getFirstVisiblePosition()) % listView.getChildCount());
             }
         });
+        startService(new Intent(this, DownloadService.class));
         adapter.setUrls(urls);
     }
 

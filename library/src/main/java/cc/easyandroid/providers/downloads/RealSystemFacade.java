@@ -1,16 +1,20 @@
 package cc.easyandroid.providers.downloads;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.NonNull;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 
 import cc.easyandroid.providers.core.EasyDownLoadManager;
 
@@ -22,13 +26,12 @@ class RealSystemFacade implements SystemFacade {
     // 1 GB
     private static final long DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE = 1024 * 1024 * 1024;
 
-    // private final ScheduledThreadPoolExecutor threadPoolExecutor;
+    private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
     public RealSystemFacade(Context context) {
         mContext = context;
         mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        //threadPoolExecutor = EasyDownLoadManager.getInstance(context).getThreadPoolExecutor();
-
+        threadPoolExecutor = EasyDownLoadManager.getInstance(context).getThreadPoolExecutor();
     }
 
     public long currentTimeMillis() {
@@ -93,13 +96,16 @@ class RealSystemFacade implements SystemFacade {
     }
 
     @Override
-    public void postNotification(long id, Notification notification) {
-        /**
-         * TODO: The system notification manager takes ints, not longs, as IDs,
-         * but the download manager uses IDs take straight from the database,
-         * which are longs. This will have to be dealt with at some point.
-         */
-        mNotificationManager.notify((int) id, notification);
+    public void postNotification(long id, Notification.Builder builder) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("001","my_channel",NotificationManager.IMPORTANCE_DEFAULT);
+            //channel.enableLights(true); //是否在桌面icon右上角展示小红点
+            channel.setLightColor(Color.GREEN); //小红点颜色
+            channel.setShowBadge(true); //是否在久按桌面图标时显示此渠道的通知
+            mNotificationManager.createNotificationChannel(channel);
+            builder.setChannelId("001");
+        }
+        mNotificationManager.notify(200, builder.build());
     }
 
     @Override
@@ -114,6 +120,10 @@ class RealSystemFacade implements SystemFacade {
 
     @Override
     public void startThread(Thread thread, boolean joinToThreadPool) {
-        thread.start();
+        if (joinToThreadPool) {
+            threadPoolExecutor.execute(thread);
+        } else {
+            thread.start();
+        }
     }
 }

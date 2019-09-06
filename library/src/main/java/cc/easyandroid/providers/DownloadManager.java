@@ -48,8 +48,7 @@ import cc.easyandroid.providers.downloads.Downloads;
  * failures or across connectivity changes and system reboots.
  * <p/>
  * Instances of this class should be obtained through
- * {@link android.content.Context#getSystemService(String)} by passing
- * {@link android.content.Context#DOWNLOAD_SERVICE}.
+ * {@link Context#DOWNLOAD_SERVICE}.
  * <p/>
  * Apps that request downloads through this API should register a broadcast
  * receiver for {@link #ACTION_NOTIFICATION_CLICKED} to appropriately handle
@@ -140,7 +139,6 @@ public class DownloadManager {
 
     /**
      * Timestamp when the download was last modified, in
-     * {@link System#currentTimeMillis System.currentTimeMillis()} (wall clock
      * time in UTC).
      */
     public final static String COLUMN_LAST_MODIFIED_TIMESTAMP = "last_modified_timestamp";
@@ -300,16 +298,16 @@ public class DownloadManager {
                     COLUMN_REASON, COLUMN_BYTES_DOWNLOADED_SO_FAR,
                     COLUMN_LAST_MODIFIED_TIMESTAMP));
 
-     /*
-         * Lists the states that the download manager can set on a download
-         * to notify applications of the download progress.
-         * The codes follow the HTTP families:<br>
-         * 1xx: informational<br>
-         * 2xx: success<br>
-         * 3xx: redirects (not used by the download manager)<br>
-         * 4xx: client errors<br>
-         * 5xx: server errors
-         */
+    /*
+     * Lists the states that the download manager can set on a download
+     * to notify applications of the download progress.
+     * The codes follow the HTTP families:<br>
+     * 1xx: informational<br>
+     * 2xx: success<br>
+     * 3xx: redirects (not used by the download manager)<br>
+     * 4xx: client errors<br>
+     * 5xx: server errors
+     */
 
     /**
      * Returns whether the status is informational (i.e. 1xx).
@@ -436,12 +434,10 @@ public class DownloadManager {
         /**
          * Set the local destination for the downloaded file to a path within
          * the application's external files directory (as returned by
-         * {@link Context#getExternalFilesDir(String)}.
          *
          * @param context the {@link Context} to use in determining the external
          *                files directory
          * @param dirType the directory type to pass to
-         *                {@link Context#getExternalFilesDir(String)}
          * @param subPath the path within the external directory. If subPath is a
          *                directory(ending with "/"), destination filename will be
          *                generated.
@@ -457,10 +453,8 @@ public class DownloadManager {
         /**
          * Set the local destination for the downloaded file to a path within
          * the public external storage directory (as returned by
-         * {@link Environment#getExternalStoragePublicDirectory(String)}.
          *
          * @param dirType the directory type to pass to
-         *                {@link Environment#getExternalStoragePublicDirectory(String)}
          * @param subPath the path within the external directory. If subPath is a
          *                directory(ending with "/"), destination filename will be
          *                generated.
@@ -553,7 +547,7 @@ public class DownloadManager {
          * Control whether a system notification is posted by the download
          * manager while this download is running. If enabled, the download
          * manager posts notifications about downloads through the system
-         * {@link cc.easyandroid.providers.DownloadManager}. By default,
+         * {@link DownloadManager}. By default,
          * a notification is shown.
          * <p/>
          * If set to false, this requires the permission

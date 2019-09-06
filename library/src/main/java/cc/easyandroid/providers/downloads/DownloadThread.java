@@ -16,13 +16,11 @@
 
 package cc.easyandroid.providers.downloads;
 
-import android.app.job.JobParameters;
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.Process;
-import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -52,22 +50,16 @@ public class DownloadThread extends Thread {
     private DownloadInfo mInfo;
     private SystemFacade mSystemFacade;
     private final OkHttpClient mOkHttpClient;//
+//    private EasyDownLoadManager easyDownLoadManager;
 
-    private final DownloadJobService mJobService;
-    private final JobParameters mParams;
-
-    public DownloadThread(DownloadJobService service, JobParameters params, DownloadInfo info) {
-        mContext = service;
-        mSystemFacade = Helpers.getSystemFacade(mContext);
-
-        mJobService = service;
-        mParams = params;
-
+    public DownloadThread(Context context, SystemFacade systemFacade,
+                          DownloadInfo info) {
+        mContext = context;
+        mSystemFacade = systemFacade;
         mInfo = info;
-       // info.startIfReady(mSystemFacade.currentTimeMillis());
-        mOkHttpClient = EasyDownLoadManager.getInstance(service).getOkHttpClient();
+//        easyDownLoadManager=EasyDownLoadManager.getInstance(context);
+        mOkHttpClient = EasyDownLoadManager.getInstance(context).getOkHttpClient();
     }
-
 
     /**
      * Returns the user agent provided by the initiating app, or use the default
@@ -189,7 +181,7 @@ public class DownloadThread extends Thread {
                 if (mInfo.mTotalBytes != -1 && innerState.mBytesSoFar >= mInfo.mTotalBytes) {
                     break;
                 }
-                addRequestHeaders(innerState, requestBuilder);
+                addRequestHeaders(innerState, requestBuilder);//添加请求头，从哪个位置开始下载
                 requestBuilder.url(state.mRequestUri);
 
                 Request request = requestBuilder.build();
@@ -236,17 +228,6 @@ public class DownloadThread extends Thread {
                     state.mNewUri, state.mMimeType);
             mInfo.mHasActiveThread = false;
         }
-        boolean needsReschedule = false;
-        if (Downloads.isStatusCompleted(mInfo.mStatus)) {
-        } else if (mInfo.mStatus == Downloads.STATUS_WAITING_TO_RETRY
-                || mInfo.mStatus == Downloads.STATUS_WAITING_FOR_NETWORK
-                || mInfo.mStatus == Downloads.STATUS_QUEUED_FOR_WIFI
-        ) {
-            needsReschedule = true;
-        }
-//        System.out.println("cgp needsReschedule mInfo.mStatus =  " +mInfo.mStatus);
-//        System.out.println("cgp needsReschedule=  " +needsReschedule);
-        mJobService.jobFinishedInternal(mParams, needsReschedule);
     }
 
     /**
@@ -257,8 +238,7 @@ public class DownloadThread extends Thread {
         byte data[] = new byte[Constants.BUFFER_SIZE];
 
 
-        // check just before sending the request to av
-        // oid using an invalid
+        // check just before sending the request to avoid using an invalid
         // connection at all
         checkConnectivity(state);
 
@@ -299,10 +279,10 @@ public class DownloadThread extends Thread {
             int status = Downloads.STATUS_WAITING_FOR_NETWORK;
             if (networkUsable == DownloadInfo.NETWORK_UNUSABLE_DUE_TO_SIZE) {
                 status = Downloads.STATUS_QUEUED_FOR_WIFI;
-                mInfo.notifyPauseDueToSize(true);
+               // mInfo.notifyPauseDueToSize(true);
             } else if (networkUsable == DownloadInfo.NETWORK_RECOMMENDED_UNUSABLE_DUE_TO_SIZE) {
                 status = Downloads.STATUS_QUEUED_FOR_WIFI;
-                mInfo.notifyPauseDueToSize(false);
+               // mInfo.notifyPauseDueToSize(false);
             }
             throw new StopRequest(status,
                     mInfo.getLogMessageForNetworkError(networkUsable));
@@ -319,14 +299,8 @@ public class DownloadThread extends Thread {
     private void transferData(State state, InnerState innerState, byte[] data,
                               InputStream entityStream) throws StopRequest {
         for (; ; ) {
-            if (mShutdownRequested) {
-                throw new StopRequest(Downloads.STATUS_HTTP_DATA_ERROR,
-                        "Local halt requested; job probably timed out");
-
-            }
             int bytesRead = readFromResponse(state, innerState, data,
                     entityStream);
-
             if (bytesRead == -1) { // success, end of stream already reached
                 handleEndOfStream(state, innerState);
                 return;
@@ -428,7 +402,6 @@ public class DownloadThread extends Thread {
     private void checkPausedOrCanceled(State state) throws StopRequest {
         synchronized (mInfo) {
             if (mInfo.mControl == Downloads.CONTROL_PAUSED) {
-                System.out.println("cgp download thread mInfo.mControl="+mInfo.mControl);
                 throw new StopRequest(Downloads.STATUS_PAUSED_BY_APP,
                         "download paused by owner");
             }
@@ -976,12 +949,4 @@ public class DownloadThread extends Thread {
         }
     }
 
-    /**
-     * Flag indicating that thread must be halted
-     */
-    private volatile boolean mShutdownRequested;
-
-    public void requestShutdown() {
-        mShutdownRequested = true;
-    }
 }

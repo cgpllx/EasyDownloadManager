@@ -72,7 +72,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
                 String url = getItem(position);
                 Uri srcUri = Uri.parse(url);
                 DownloadManager.Request request = new DownloadManager.Request(srcUri);
-                request.setTitle("" + position);
+                request.setTitle("标题" + position);
                 request.setShowRunningNotification(false);
 //                request.setVisibleInDownloadsUi(false);
 //                request.setId()
@@ -143,7 +143,7 @@ public class MyAdapter extends BaseAdapter implements Observer {
                         Uri srcUri = Uri.parse(url);
                         DownloadManager.Request request = new DownloadManager.Request(srcUri);
                         request.setTitle("" + position);
-                        request.setShowRunningNotification(false);
+                        //request.setShowRunningNotification(false);
                         request.setDestinationInExternalPublicDir(
                                 Environment.DIRECTORY_DOWNLOADS, "/");
                         request.setDescription("Just for test");

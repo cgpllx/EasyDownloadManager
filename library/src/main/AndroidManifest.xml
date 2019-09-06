@@ -3,6 +3,8 @@
     package="cc.easyandroid.downloadprovider">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application>
         <activity
             android:name="cc.easyandroid.providers.permissions.PermissionActivity"
@@ -11,10 +13,13 @@
         <provider
             android:name="cc.easyandroid.providers.downloads.DownloadProvider"
             android:authorities="${AUTHORITY}.downloads" />
-        <service
-            android:name="cc.easyandroid.providers.downloads.DownloadJobService"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <service android:name="cc.easyandroid.providers.downloads.DownloadService" />
+
+        <!--<service-->
+            <!--android:name="cc.easyandroid.providers.downloads.DownloadJobService"-->
+            <!--android:exported="true"-->
+            <!--android:permission="android.permission.BIND_JOB_SERVICE" />-->
         <receiver
             android:name="cc.easyandroid.providers.downloads.DownloadReceiver"
             android:exported="true">

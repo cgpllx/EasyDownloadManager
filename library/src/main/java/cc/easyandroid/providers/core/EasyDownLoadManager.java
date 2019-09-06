@@ -71,14 +71,7 @@ public class EasyDownLoadManager extends Observable {
         refreshTask = new DbStatusRefreshTask(resolver);
         baseQuery = onCreatQuery();
 
-
         startQuery();
-        Helpers.getAsyncHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                Helpers.handleBootCompleted(mContext);
-            }
-        });
     }
 
     protected DownloadManager.Query onCreatQuery() {
@@ -104,27 +97,34 @@ public class EasyDownLoadManager extends Observable {
     }
 
     public void restartDownload(long... ids) {
-        try {
-            executePer(() -> getDownloadManager().restartDownload(ids));
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        executePer(() -> {
+            try {
+                getDownloadManager().restartDownload(ids);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public void resumeDownload(long... ids) {
-        try {
-            executePer(() -> getDownloadManager().resumeDownload(ids));
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        executePer(() -> {
+            try {
+                getDownloadManager().resumeDownload(ids);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
     }
 
     public void pauseDownload(long... ids) {
-        try {
-            getDownloadManager().pauseDownload(ids);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        executePer(() -> {
+            try {
+                getDownloadManager().pauseDownload(ids);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 
@@ -138,7 +138,7 @@ public class EasyDownLoadManager extends Observable {
             command.doExecute();
             return;
         }
-       PermissionsUtil.OnPermissionListener _permissionListener =null;
+        PermissionsUtil.OnPermissionListener _permissionListener = null;
         if (_permissionListener == null) {
             _permissionListener = new PermissionsUtil.OnPermissionListener() {
                 @Override
@@ -173,8 +173,6 @@ public class EasyDownLoadManager extends Observable {
         PermissionsUtil.checkPermissions(mContext, _permissionListener, permissions);
     }
 
-
-    PermissionsUtil.OnPermissionListener _permissionListener;
 
     @Override
     public void addObserver(Observer observer) {
@@ -385,6 +383,17 @@ public class EasyDownLoadManager extends Observable {
         public void onInvalidated() {
             notifyDataSetInvalidated();
         }
+    }
+
+    private final ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(3);//下载app用的线程池
+
+    @Deprecated
+    public void setCorePoolSize(int corePoolSize) {
+        threadPoolExecutor.setCorePoolSize(corePoolSize);
+    }
+
+    public ScheduledThreadPoolExecutor getThreadPoolExecutor() {
+        return threadPoolExecutor;
     }
 
     private OkHttpClient mOkHttpClient;

@@ -8,7 +8,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 
 interface SystemFacade {
     /**
-     * @see System#currentTimeMillis()
+     * @see //System#currentTimeMillis()
      */
     public long currentTimeMillis();
 
@@ -49,7 +49,7 @@ interface SystemFacade {
     /**
      * Post a system notification to the NotificationManager.
      */
-    public void postNotification(long id, Notification notification);
+    public void postNotification(long id, Notification.Builder builder);
 
     /**
      * Cancel a system notification.

@@ -17,6 +17,9 @@
 package cc.easyandroid.providers.downloads;
 
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentUris;
@@ -24,11 +27,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
+import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -37,6 +43,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import cc.easyandroid.downloadprovider.R;
 
 /**
  * Performs the background downloads requested by applications that use the
@@ -94,9 +102,14 @@ public class DownloadService extends Service {
                 Log.v(Constants.TAG,
                         "Service ContentObserver received notification");
             }
-            updateFromProvider();
+
         }
 
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+            updateFromProvider();
+        }
     }
 
     /**
@@ -140,7 +153,27 @@ public class DownloadService extends Service {
             Log.v(Constants.TAG, "Service onStart");
         }
         updateFromProvider();
+        Notification notification = buildNotification(); // 获取构建好的Notification
+        startForeground(200, notification);// 开始前台服务
         return returnValue;
+    }
+
+    Notification buildNotification() {
+        Notification notification;
+        Notification.Builder builder = new Notification.Builder(this);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            String CHANNEL_ONE_ID = "com.huanqiuchuxing.driver";
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ONE_ID, "driver", NotificationManager.IMPORTANCE_LOW);
+            mChannel.setDescription("description");
+            NotificationManager  mManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mManager.createNotificationChannel(mChannel);
+            builder.setChannelId(CHANNEL_ONE_ID);
+        }
+        int iconResource = android.R.drawable.stat_sys_download;
+        builder.setSmallIcon(iconResource);
+        builder.setAutoCancel(false);//设置通知被点击一次是否自动取消
+        notification = builder.build();//构建通知对象
+        return notification;
     }
 
     /**
@@ -194,7 +227,7 @@ public class DownloadService extends Service {
                             stopSelf();
                         }
                         if (wakeUp != Long.MAX_VALUE) {
-                            scheduleAlarm(wakeUp);
+                             //scheduleAlarm(wakeUp);
                         }
                         return;
                     }

@@ -16,13 +16,8 @@
 
 package cc.easyandroid.providers.downloads;
 
-import java.io.File;
-
-import cc.easyandroid.providers.DownloadManager;
-
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -32,6 +27,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
+
+import java.io.File;
+
+import cc.easyandroid.providers.DownloadManager;
 
 /**
  * Receives system broadcasts (boot, network connectivity)
@@ -185,34 +184,8 @@ public class DownloadReceiver extends BroadcastReceiver {
         mSystemFacade.sendBroadcast(appIntent);
     }
 
-    private void startService(final Context context) {
-       // context.startService(new Intent(context, DownloadService.class));
-        final PendingResult result = goAsync();
-        Helpers.getAsyncHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                handleBootCompleted(context);
-                result.finish();
-            }
-        });
-    }
-    private void handleBootCompleted(Context context) {
-        // Show any relevant notifications for completed downloads
-       // getDownloadNotifier(context).update();
-
-        // Schedule all downloads that are ready
-        final ContentResolver resolver = context.getContentResolver();
-        try (Cursor cursor = resolver.query(Downloads.ALL_DOWNLOADS_CONTENT_URI, null, null,
-                null, null)) {
-            final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, cursor);
-            final DownloadInfo info = new DownloadInfo(context);
-            while (cursor.moveToNext()) {
-                reader.updateFromDatabase(info);
-                Helpers.scheduleJob(context, info);
-            }
-        }
-
-        // Schedule idle pass to clean up orphaned files
-       // DownloadIdleService.scheduleIdlePass(context);
+    private void startService(Context context) {
+        context.startService(new Intent(context, DownloadService.class));
+        //TODO 先屏蔽。後期改進
     }
 }

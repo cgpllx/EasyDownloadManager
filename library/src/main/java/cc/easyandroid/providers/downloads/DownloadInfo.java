@@ -16,7 +16,6 @@
 
 package cc.easyandroid.providers.downloads;
 
-import android.app.job.JobInfo;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -26,18 +25,16 @@ import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.Environment;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import cc.easyandroid.providers.DownloadManager;
+import cc.easyandroid.providers.core.EasyDownLoadManager;
 
 /**
  * Stores information about an individual download.
@@ -55,13 +52,17 @@ public class DownloadInfo {
         }
 
         public DownloadInfo newDownloadInfo(Context context, SystemFacade systemFacade) {
-            DownloadInfo info = new DownloadInfo(context);
-            updateFromDatabase(info);
+            DownloadInfo info = new DownloadInfo(context, systemFacade);
+            updateFromDatabase(info, true);
             readRequestHeaders(info);
             return info;
         }
 
         public void updateFromDatabase(DownloadInfo info) {
+            updateFromDatabase(info, false);
+        }
+
+        public void updateFromDatabase(DownloadInfo info, boolean init) {
             info.mId = getLong(Downloads._ID);
             info.mUri = getString(info.mUri, Downloads.COLUMN_URI);
             info.mNoIntegrity = getInt(Downloads.COLUMN_NO_INTEGRITY) == 1;
@@ -93,8 +94,10 @@ public class DownloadInfo {
             info.mBypassRecommendedSizeLimit =
                     getInt(Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
 
-            synchronized (this) {
-                info.mControl = getInt(Downloads.COLUMN_CONTROL);
+            synchronized (this) {//这里有可能状态是其他，但是这里是暂停，bug
+                if (!init || (info.mStatus != Downloads.STATUS_PENDING && info.mStatus != Downloads.STATUS_RUNNING)) {
+                    info.mControl = getInt(Downloads.COLUMN_CONTROL);
+                }
             }
         }
 
@@ -246,9 +249,9 @@ public class DownloadInfo {
     private SystemFacade mSystemFacade;
     private Context mContext;
 
-    public DownloadInfo(Context context ) {
+    private DownloadInfo(Context context, SystemFacade systemFacade) {
         mContext = context;
-        mSystemFacade = Helpers.getSystemFacade(context);
+        mSystemFacade = systemFacade;
         mFuzz = Helpers.sRandom.nextInt(1001);
     }
 
@@ -456,7 +459,6 @@ public class DownloadInfo {
         if (!isReadyToStart(now)) {
             return;
         }
-
         if (Constants.LOGV) {
             Log.v(Constants.TAG, "Service spawning thread to handle download " + mId);
         }
@@ -470,9 +472,10 @@ public class DownloadInfo {
             mContext.getContentResolver().update(getAllDownloadsUri(), values, null, null);
             return;
         }
-//        DownloadThread downloader = new DownloadThread(mContext, mSystemFacade, this);
-//        mHasActiveThread = true;
-//        mSystemFacade.startThread(downloader, true);//这里不能马上执行线程，防止线程太多
+        DownloadThread downloader = new DownloadThread(mContext, mSystemFacade, this);
+
+        mHasActiveThread = true;
+        mSystemFacade.startThread(downloader, false);//这里不能马上执行线程，防止线程太多
     }
 
     public Uri getMyDownloadsUri() {
@@ -531,127 +534,4 @@ public class DownloadInfo {
         return when - now;
     }
 
-    void notifyPauseDueToSize(boolean isWifiRequired) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(getAllDownloadsUri());
-        intent.setClassName(SizeLimitActivity.class.getPackage().getName(),
-                SizeLimitActivity.class.getName());
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(EXTRA_IS_WIFI_REQUIRED, isWifiRequired);
-        mContext.startActivity(intent);
-    }
-    /**
-     * Returns whether this download is ready to be scheduled.
-     */
-    public boolean isReadyToSchedule() {
-        if (mControl == Downloads.CONTROL_PAUSED) {
-            // the download is paused, so it's not going to start
-            return false;
-        }
-        switch (mStatus) {
-            case 0:
-            case Downloads.STATUS_PENDING:
-            case Downloads.STATUS_RUNNING:
-            case Downloads.STATUS_WAITING_FOR_NETWORK:
-            case Downloads.STATUS_WAITING_TO_RETRY:
-            case Downloads.STATUS_QUEUED_FOR_WIFI:
-                return true;
-
-            case Downloads.STATUS_DEVICE_NOT_FOUND_ERROR:
-                // is the media mounted?
-                final Uri uri = Uri.parse(mUri);
-                if (ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
-                    final File file = new File(uri.getPath());
-                    return Environment.MEDIA_MOUNTED
-                            .equals(Environment.getExternalStorageState(file));
-                } else {
-                    Log.w(Constants.TAG, "Expected file URI on external storage: " + mUri);
-                    return false;
-                }
-
-            default:
-                return false;
-        }
-    }    /**
-     * Return if this download is visible to the user while running.
-     */
-    public boolean isVisible() {
-        switch (mVisibility) {
-            case Downloads.VISIBILITY_VISIBLE:
-            case Downloads.VISIBILITY_VISIBLE_NOTIFY_COMPLETED:
-                return true;
-            default:
-                return false;
-        }
-    }
-    /**
-     * Return minimum latency in milliseconds required before this download is
-     * allowed to start again.
-     *
-     * @see JobInfo.Builder#setMinimumLatency(long)
-     */
-    public long getMinimumLatency() {
-        if (mStatus == Downloads.STATUS_WAITING_TO_RETRY) {
-            final long now = mSystemFacade.currentTimeMillis();
-            final long startAfter;
-            if (mNumFailed == 0) {
-                startAfter = now;
-            } else if (mRetryAfter > 0) {
-                startAfter = mLastMod + fuzzDelay(mRetryAfter);
-            } else {
-                final long delay = (Constants.RETRY_FIRST_DELAY * DateUtils.SECOND_IN_MILLIS
-                        * (1 << (mNumFailed - 1)));
-                startAfter = mLastMod + fuzzDelay(delay);
-            }
-            return Math.max(0, startAfter - now);
-        } else {
-            return 0;
-        }
-    }
-    /**
-     * Add random fuzz to the given delay so it's anywhere between 1-1.5x the
-     * requested delay.
-     */
-    private long fuzzDelay(long delay) {
-        return delay + Helpers.sRandom.nextInt((int) (delay / 2));
-    }
-    /**
-     * Return the network type constraint required by this download.
-     *
-     * @see JobInfo.Builder#setRequiredNetworkType(int)
-     */
-    public int getRequiredNetworkType(long totalBytes) {
-//        if (!mAllowMetered) {
-//            return JobInfo.NETWORK_TYPE_UNMETERED;
-//        }
-        if (mAllowedNetworkTypes == android.app.DownloadManager.Request.NETWORK_WIFI) {
-            return JobInfo.NETWORK_TYPE_UNMETERED;
-        }
-        if (totalBytes > mSystemFacade.getMaxBytesOverMobile()) {
-            return JobInfo.NETWORK_TYPE_UNMETERED;
-        }
-        if (totalBytes > mSystemFacade.getRecommendedMaxBytesOverMobile()
-                && mBypassRecommendedSizeLimit == 0) {
-            return JobInfo.NETWORK_TYPE_UNMETERED;
-        }
-        if (!mAllowRoaming) {
-            return JobInfo.NETWORK_TYPE_NOT_ROAMING;
-        }
-        return JobInfo.NETWORK_TYPE_ANY;
-    }
-    public static DownloadInfo queryDownloadInfo(Context context, long downloadId) {
-        final ContentResolver resolver = context.getContentResolver();
-        try (Cursor cursor = resolver.query(
-                ContentUris.withAppendedId(Downloads.ALL_DOWNLOADS_CONTENT_URI, downloadId),
-                null, null, null, null)) {
-            final Reader reader = new Reader(resolver, cursor);
-            final DownloadInfo info = new DownloadInfo(context);
-            if (cursor.moveToFirst()) {
-                reader.updateFromDatabase(info);
-                reader.readRequestHeaders(info);
-                return info;
-            }
-        }
-        return null;
-    }
 }

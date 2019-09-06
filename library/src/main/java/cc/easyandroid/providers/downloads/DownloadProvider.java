@@ -16,9 +16,7 @@
 
 package cc.easyandroid.providers.downloads;
 
-import android.app.job.JobScheduler;
 import android.content.ContentProvider;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -32,26 +30,21 @@ import android.database.CursorWrapper;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.provider.BaseColumns;
-import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import static android.provider.BaseColumns._ID;
 
 /**
  * Allows application to interact with the download manager.
@@ -524,7 +517,7 @@ public final class DownloadProvider extends ContentProvider {
                     }
                 }
             } catch (PackageManager.NameNotFoundException ex) {
-                /* ignored for now */
+        /* ignored for now */
             }
         }
         copyString(Downloads.COLUMN_NOTIFICATION_EXTRAS, values, filteredValues);
@@ -532,7 +525,7 @@ public final class DownloadProvider extends ContentProvider {
         copyString(Downloads.COLUMN_USER_AGENT, values, filteredValues);
         copyString(Downloads.COLUMN_REFERER, values, filteredValues);
 //        if (getContext().checkCallingPermission(Downloads.PERMISSION_ACCESS_ADVANCED) == PackageManager.PERMISSION_GRANTED) {
-        copyInteger(Downloads.COLUMN_OTHER_UID, values, filteredValues);
+            copyInteger(Downloads.COLUMN_OTHER_UID, values, filteredValues);
 //        }
         filteredValues.put(Constants.UID, Binder.getCallingUid());
         if (Binder.getCallingUid() == 0) {
@@ -572,8 +565,9 @@ public final class DownloadProvider extends ContentProvider {
             }
         }
 
-        //Context context = getContext();
-        //context.startService(new Intent(context, DownloadService.class));
+        Context context = getContext();
+
+        context.startService(new Intent(context, DownloadService.class));
 
         long rowID = db.insert(DB_TABLE, null, filteredValues);
         System.out.println("cgp=" + rowID);
@@ -582,17 +576,10 @@ public final class DownloadProvider extends ContentProvider {
             return null;
         }
 
+
         insertRequestHeaders(db, rowID, values);
-//        context.startService(new Intent(context, DownloadService.class));
+        context.startService(new Intent(context, DownloadService.class));
         notifyContentChanged(uri, match);
-
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            Helpers.scheduleJob(getContext(), rowID);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
         return ContentUris.withAppendedId(Downloads.CONTENT_URI, rowID);
     }
 
@@ -629,7 +616,7 @@ public final class DownloadProvider extends ContentProvider {
      * restrictions are imposed. We check those restrictions here.
      *
      * @param values ContentValues provided to insert()
-     * @throws   if the caller has insufficient permissions
+     * @throws SecurityException if the caller has insufficient permissions
      */
     private void checkInsertPermissions(ContentValues values) {
         if ((getContext().checkCallingOrSelfPermission(
@@ -652,7 +639,7 @@ public final class DownloadProvider extends ContentProvider {
                 Downloads.DESTINATION_FILE_URI);
 
         if (getContext().checkCallingOrSelfPermission(
-                Downloads.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED || true) {
+                Downloads.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED||true) {
             enforceAllowedValues(values, Downloads.COLUMN_VISIBILITY,
                     Downloads.VISIBILITY_HIDDEN, Downloads.VISIBILITY_VISIBLE);
         } else {
@@ -779,7 +766,7 @@ public final class DownloadProvider extends ContentProvider {
     private void logVerboseQueryInfo(String[] projection,
                                      final String selection, final String[] selectionArgs,
                                      final String sort, SQLiteDatabase db) {
-        java.lang.StringBuilder sb = new java.lang.StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("starting query, database is ");
         if (db != null) {
             sb.append("not ");
@@ -959,27 +946,6 @@ public final class DownloadProvider extends ContentProvider {
                 } else {
                     count = 0;
                 }
-                if (startService) {
-                    final long token = Binder.clearCallingIdentity();
-                    try (Cursor cursor = query(uri, null, where, whereArgs, null, null)) {
-                        final DownloadInfo.Reader reader = new DownloadInfo.Reader(getContext().getContentResolver(),
-                                cursor);
-                        final DownloadInfo info = new DownloadInfo(getContext());
-                        while (cursor.moveToNext()) {
-                            reader.updateFromDatabase(info);
-                           // if (updateSchedule) {
-                                Helpers.scheduleJob(getContext(), info);
-                           // }
-                           // if (isCompleting) {
-                               // info.sendIntentIfRequested();
-                           // }
-                        }
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                }
-
-
                 break;
 
             default:
@@ -988,10 +954,10 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         notifyContentChanged(uri, match);
-//        if (startService) {
-//            Context context = getContext();
-//            context.startService(new Intent(context, DownloadService.class));
-//        }
+        if (startService) {
+            Context context = getContext();
+            context.startService(new Intent(context, DownloadService.class));
+        }
         return count;
     }
 
@@ -1039,10 +1005,9 @@ public final class DownloadProvider extends ContentProvider {
     @Override
     public int delete(final Uri uri, final String where,
                       final String[] whereArgs) {
-        final Context context = getContext();
-        final ContentResolver resolver = context.getContentResolver();
+
         Helpers.validateSelection(where, sAppReadableColumnsSet);
-        final JobScheduler scheduler = (JobScheduler) getContext().getSystemService(Context.JOB_SCHEDULER_SERVICE);
+
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         int count;
         int match = sURIMatcher.match(uri);
@@ -1051,37 +1016,6 @@ public final class DownloadProvider extends ContentProvider {
             case MY_DOWNLOADS_ID:
             case ALL_DOWNLOADS:
             case ALL_DOWNLOADS_ID:
-                final SQLiteQueryBuilder qb = getQueryBuilder(uri, match);
-                try (Cursor cursor = qb.query(db, null, where, whereArgs, null, null, null)) {
-                    final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, cursor);
-                    final DownloadInfo info = new DownloadInfo(context);
-                    while (cursor.moveToNext()) {
-                        reader.updateFromDatabase(info);
-                        scheduler.cancel((int) info.mId);
-
-                        revokeAllDownloadsPermission(info.mId);
-                       // DownloadStorageProvider.onDownloadProviderDelete(getContext(), info.mId);
-
-                        final String path = info.mFileName;
-                        if (!TextUtils.isEmpty(path)) {
-                            try {
-                                final File file = new File(path).getCanonicalFile();
-                                if (Helpers.isFilenameValid( path)) {
-                                    Log.v(Constants.TAG,
-                                            "Deleting " + file + " via provider delete");
-                                    file.delete();
-                                }
-                            } catch (IOException ignored) {
-                            }
-                        }
-                        // If the download wasn't completed yet, we're
-                        // effectively completing it now, and we need to send
-                        // any requested broadcasts
-                        if (!Downloads.isStatusCompleted(info.mStatus)) {
-                            info.sendIntentIfRequested();
-                        }
-                    }
-                }
                 SqlSelection selection = getWhereClause(uri, where, whereArgs,
                         match);
                 deleteRequestHeaders(db, selection.getSelection(),
@@ -1097,64 +1031,7 @@ public final class DownloadProvider extends ContentProvider {
         notifyContentChanged(uri, match);
         return count;
     }
-    private void grantAllDownloadsPermission(String toPackage, long id) {
-        final Uri uri = ContentUris.withAppendedId(Downloads.ALL_DOWNLOADS_CONTENT_URI, id);
-        getContext().grantUriPermission(toPackage, uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-    }
 
-    private void revokeAllDownloadsPermission(long id) {
-        final Uri uri = ContentUris.withAppendedId(Downloads.ALL_DOWNLOADS_CONTENT_URI, id);
-        getContext().revokeUriPermission(uri, ~0);
-    }
-    /**
-     * Create a query builder that filters access to the underlying database
-     * based on both the requested {@link Uri} and permissions of the caller.
-     */
-    private SQLiteQueryBuilder getQueryBuilder(final Uri uri, int match) {
-        final String table;
-        final StringBuilder where = new StringBuilder();
-        switch (match) {
-            // The "my_downloads" view normally limits the caller to operating
-            // on downloads that they either directly own, or have been given
-            // indirect ownership of via OTHER_UID.
-            case MY_DOWNLOADS_ID:
-                appendWhereExpression(where, _ID + "=" + getDownloadIdFromUri(uri));
-                // fall-through
-            case MY_DOWNLOADS:
-                table = DB_TABLE;
-                if (getContext().checkCallingOrSelfPermission(
-                        Downloads.PERMISSION_ACCESS_ALL) != PackageManager.PERMISSION_GRANTED) {
-                    appendWhereExpression(where, Constants.UID + "=" + Binder.getCallingUid()
-                            + " OR " +   Downloads.COLUMN_OTHER_UID + "=" + Binder.getCallingUid());
-                }
-                break;
-
-            // The "all_downloads" view is already limited via <path-permission>
-            // to only callers holding the ACCESS_ALL_DOWNLOADS permission, but
-            // access may also be delegated via Uri permission grants.
-            case ALL_DOWNLOADS_ID:
-                appendWhereExpression(where, _ID + "=" + getDownloadIdFromUri(uri));
-                // fall-through
-            case ALL_DOWNLOADS:
-                table = DB_TABLE;
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown URI: " + uri);
-        }
-
-        final SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setStrict(true);
-        qb.setTables(table);
-        qb.appendWhere(where);
-        return qb;
-    }
-    private static void appendWhereExpression(StringBuilder sb, String expression) {
-        if (sb.length() > 0) {
-            sb.append(" AND ");
-        }
-        sb.append('(').append(expression).append(')');
-    }
     /**
      * Remotely opens a file
      */
@@ -1235,7 +1112,7 @@ public final class DownloadProvider extends ContentProvider {
             } else {
                 String filename = cursor.getString(0);
                 Log.v(Constants.TAG, "filename in openFile: " + filename);
-                if (new java.io.File(filename).isFile()) {
+                if (new File(filename).isFile()) {
                     Log.v(Constants.TAG, "file exists in openFile");
                 }
             }

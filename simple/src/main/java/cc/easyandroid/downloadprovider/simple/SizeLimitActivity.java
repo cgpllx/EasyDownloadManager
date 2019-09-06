@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package cc.easyandroid.providers.downloads;
+package cc.easyandroid.downloadprovider.simple;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -30,7 +30,10 @@ import android.net.Uri;
 import android.text.format.Formatter;
 import android.util.Log;
 
-import cc.easyandroid.downloadprovider.R;
+import cc.easyandroid.downloadprovider.simple.R;
+import cc.easyandroid.providers.downloads.Constants;
+import cc.easyandroid.providers.downloads.DownloadInfo;
+import cc.easyandroid.providers.downloads.Downloads;
 
 /**
  * Activity to show dialogs to the user when a download exceeds a limit on download sizes for

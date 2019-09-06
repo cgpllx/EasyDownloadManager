@@ -16,10 +16,6 @@
 
         <service android:name="cc.easyandroid.providers.downloads.DownloadService" />
 
-        <!--<service-->
-            <!--android:name="cc.easyandroid.providers.downloads.DownloadJobService"-->
-            <!--android:exported="true"-->
-            <!--android:permission="android.permission.BIND_JOB_SERVICE" />-->
         <receiver
             android:name="cc.easyandroid.providers.downloads.DownloadReceiver"
             android:exported="true">

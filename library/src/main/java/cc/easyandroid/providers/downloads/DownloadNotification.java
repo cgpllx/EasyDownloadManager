@@ -34,6 +34,7 @@ import java.util.HashMap;
 
 import cc.easyandroid.downloadprovider.R;
 
+
 /**
  * This class handles the updating of the Notification Manager for the
  * cases where there is an ongoing download. Once the download is complete

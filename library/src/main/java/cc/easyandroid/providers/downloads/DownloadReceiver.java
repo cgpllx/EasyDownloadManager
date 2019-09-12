@@ -26,6 +26,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.File;
@@ -185,7 +186,11 @@ public class DownloadReceiver extends BroadcastReceiver {
     }
 
     private void startService(Context context) {
-        context.startService(new Intent(context, DownloadService.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(new Intent(context, DownloadService.class));
+        } else {
+            context.startService(new Intent(context, DownloadService.class));
+        }
         //TODO 先屏蔽。後期改進
     }
 }

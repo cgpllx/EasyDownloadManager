@@ -29,7 +29,7 @@ public class PermissionActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String[] permissions = intent.getStringArrayExtra(INTENT_EXTRA_PERMISSIONS);
-        if (permissions.length == 0) finish();
+        if (permissions==null||permissions.length == 0) finish();
         _requestCode = intent.getIntExtra(INTENT_EXTRA_REQUEST_CODE, -1);
         if (_requestCode == -1) finish();
         _permissionListener = PermissionsUtil.getPermissionListener(_requestCode);
@@ -62,7 +62,7 @@ public class PermissionActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
         @NonNull int[] grantResults) {
-        if (requestCode != _requestCode) {
+        if (requestCode != _requestCode || permissions == null || permissions.length == 0) {
             finish();
         }
         _permissions_denied.clear();

@@ -2,6 +2,7 @@ package cc.easyandroid.downloadprovider.simple;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -55,7 +56,11 @@ public class MainActivity extends  AppCompatActivity {
                 return listView.getChildAt((position - getFirstVisiblePosition()) % listView.getChildCount());
             }
         });
-        startService(new Intent(this, DownloadService.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(new Intent(this, DownloadService.class));
+        } else {
+            startService(new Intent(this, DownloadService.class));
+        }
         adapter.setUrls(urls);
     }
 

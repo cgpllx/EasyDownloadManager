@@ -90,7 +90,7 @@ public final class Downloads implements BaseColumns {
      *
      * @hide
      */
-    public static final String ACTION_DOWNLOAD_COMPLETED = "android.intent.action.DOWNLOAD_COMPLETED";
+    public static final String ACTION_DOWNLOAD_COMPLETED = "cc.easyandroid.action.DOWNLOAD_COMPLETED";
 
     /**
      * Broadcast Action: this is sent by the download manager to the app that
@@ -103,7 +103,7 @@ public final class Downloads implements BaseColumns {
      *
      * @hide
      */
-    public static final String ACTION_NOTIFICATION_CLICKED = "android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED";
+    public static final String ACTION_NOTIFICATION_CLICKED = "cc.easyandroid.action.DOWNLOAD_NOTIFICATION_CLICKED";
 
     /**
      * The name of the column containing the URI of the data being downloaded.

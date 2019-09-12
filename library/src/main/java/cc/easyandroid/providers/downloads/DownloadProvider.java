@@ -32,6 +32,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -567,7 +568,11 @@ public final class DownloadProvider extends ContentProvider {
 
         Context context = getContext();
 
-        context.startService(new Intent(context, DownloadService.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(new Intent(context, DownloadService.class));
+        } else {
+            context.startService(new Intent(context, DownloadService.class));
+        }
 
         long rowID = db.insert(DB_TABLE, null, filteredValues);
         System.out.println("cgp=" + rowID);
@@ -578,7 +583,11 @@ public final class DownloadProvider extends ContentProvider {
 
 
         insertRequestHeaders(db, rowID, values);
-        context.startService(new Intent(context, DownloadService.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(new Intent(context, DownloadService.class));
+        } else {
+            context.startService(new Intent(context, DownloadService.class));
+        }
         notifyContentChanged(uri, match);
         return ContentUris.withAppendedId(Downloads.CONTENT_URI, rowID);
     }
@@ -956,7 +965,11 @@ public final class DownloadProvider extends ContentProvider {
         notifyContentChanged(uri, match);
         if (startService) {
             Context context = getContext();
-            context.startService(new Intent(context, DownloadService.class));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(new Intent(context, DownloadService.class));
+            } else {
+                context.startService(new Intent(context, DownloadService.class));
+            }
         }
         return count;
     }

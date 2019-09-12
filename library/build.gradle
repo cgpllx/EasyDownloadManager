@@ -45,9 +45,9 @@ allprojects {
 dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
     //通知要用到
-    compileOnly 'com.android.support:appcompat-v7:28.0.0'
-    compileOnly "com.android.support:support-v4:28.0.0"
-    compileOnly 'com.squareup.okhttp3:okhttp:3.3.0'
+    api 'com.android.support:appcompat-v7:28.0.0'
+//    compileOnly "com.android.support:support-v4:28.0.0"
+    api 'com.squareup.okhttp3:okhttp:3.3.0'
 }
 publish {
     userOrg = 'cgpllx'      //bintray注册的用户名

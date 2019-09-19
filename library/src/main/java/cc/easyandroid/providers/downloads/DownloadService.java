@@ -27,14 +27,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
-import android.provider.Settings;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -43,8 +40,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import cc.easyandroid.downloadprovider.R;
 
 /**
  * Performs the background downloads requested by applications that use the

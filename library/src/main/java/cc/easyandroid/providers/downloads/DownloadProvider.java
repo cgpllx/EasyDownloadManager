@@ -16,6 +16,7 @@
 
 package cc.easyandroid.providers.downloads;
 
+import android.app.ActivityManager;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -153,7 +154,7 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * This class encapsulates a SQL where clause and its parameters. It makes
      * it possible for shared methods (like
-     * {@link DownloadProvider#getWhereClause(Uri, String, String[], int)}) to
+     * {@link DownloadProvider# (Uri,  ,  [], int)}) to
      * return both pieces of information, and provides some utility logic to
      * ease piece-by-piece construction of selections.
      */
@@ -518,7 +519,7 @@ public final class DownloadProvider extends ContentProvider {
                     }
                 }
             } catch (PackageManager.NameNotFoundException ex) {
-        /* ignored for now */
+                /* ignored for now */
             }
         }
         copyString(Downloads.COLUMN_NOTIFICATION_EXTRAS, values, filteredValues);
@@ -526,7 +527,7 @@ public final class DownloadProvider extends ContentProvider {
         copyString(Downloads.COLUMN_USER_AGENT, values, filteredValues);
         copyString(Downloads.COLUMN_REFERER, values, filteredValues);
 //        if (getContext().checkCallingPermission(Downloads.PERMISSION_ACCESS_ADVANCED) == PackageManager.PERMISSION_GRANTED) {
-            copyInteger(Downloads.COLUMN_OTHER_UID, values, filteredValues);
+        copyInteger(Downloads.COLUMN_OTHER_UID, values, filteredValues);
 //        }
         filteredValues.put(Constants.UID, Binder.getCallingUid());
         if (Binder.getCallingUid() == 0) {
@@ -568,26 +569,18 @@ public final class DownloadProvider extends ContentProvider {
 
         Context context = getContext();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(new Intent(context, DownloadService.class));
-        } else {
-            context.startService(new Intent(context, DownloadService.class));
-        }
 
+        startService(context);
         long rowID = db.insert(DB_TABLE, null, filteredValues);
-        System.out.println("cgp=" + rowID);
         if (rowID == -1) {
             Log.d(Constants.TAG, "couldn't insert into downloads database");
             return null;
         }
 
-
         insertRequestHeaders(db, rowID, values);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(new Intent(context, DownloadService.class));
-        } else {
-            context.startService(new Intent(context, DownloadService.class));
-        }
+
+        startService(context);
+
         notifyContentChanged(uri, match);
         return ContentUris.withAppendedId(Downloads.CONTENT_URI, rowID);
     }
@@ -625,7 +618,7 @@ public final class DownloadProvider extends ContentProvider {
      * restrictions are imposed. We check those restrictions here.
      *
      * @param values ContentValues provided to insert()
-     * @throws SecurityException if the caller has insufficient permissions
+     * @throws if the caller has insufficient permissions
      */
     private void checkInsertPermissions(ContentValues values) {
         if ((getContext().checkCallingOrSelfPermission(
@@ -648,7 +641,7 @@ public final class DownloadProvider extends ContentProvider {
                 Downloads.DESTINATION_FILE_URI);
 
         if (getContext().checkCallingOrSelfPermission(
-                Downloads.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED||true) {
+                Downloads.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED || true) {
             enforceAllowedValues(values, Downloads.COLUMN_VISIBILITY,
                     Downloads.VISIBILITY_HIDDEN, Downloads.VISIBILITY_VISIBLE);
         } else {
@@ -965,11 +958,7 @@ public final class DownloadProvider extends ContentProvider {
         notifyContentChanged(uri, match);
         if (startService) {
             Context context = getContext();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(new Intent(context, DownloadService.class));
-            } else {
-                context.startService(new Intent(context, DownloadService.class));
-            }
+            startService(context);
         }
         return count;
     }
@@ -1206,4 +1195,35 @@ public final class DownloadProvider extends ContentProvider {
         private CrossProcessCursor mCursor;
     }
 
+    private void startService(Context context) {
+        if (isAppOnForeground(context)) {
+            context.startService(new Intent(context, DownloadService.class));
+        } else {
+            int version = Build.VERSION.SDK_INT;
+            if (version >= Build.VERSION_CODES.O) {
+                if (version != 17) {//Context.startForegroundService() did not then call Service.startForeground()
+                    context.startForegroundService(new Intent(context, DownloadService.class));
+                }
+            } else {
+                context.startService(new Intent(context, DownloadService.class));
+            }
+        }
+    }
+
+    //在进程中去寻找当前APP的信息，判断是否在前台运行
+    private boolean isAppOnForeground(Context context) {
+        ActivityManager activityManager = (ActivityManager) context.getApplicationContext().getSystemService(
+                Context.ACTIVITY_SERVICE);
+        String packageName = context.getApplicationContext().getPackageName();
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+        if (appProcesses == null)
+            return false;
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.processName.equals(packageName)
+                    && appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

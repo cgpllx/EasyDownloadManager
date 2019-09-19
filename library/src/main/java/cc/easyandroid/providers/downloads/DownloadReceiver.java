@@ -16,6 +16,7 @@
 
 package cc.easyandroid.providers.downloads;
 
+import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentUris;
@@ -30,6 +31,7 @@ import android.os.Build;
 import android.util.Log;
 
 import java.io.File;
+import java.util.List;
 
 import cc.easyandroid.providers.DownloadManager;
 
@@ -186,11 +188,34 @@ public class DownloadReceiver extends BroadcastReceiver {
     }
 
     private void startService(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(new Intent(context, DownloadService.class));
-        } else {
+        if (isAppOnForeground(context)) {
             context.startService(new Intent(context, DownloadService.class));
+        } else {
+            int version = android.os.Build.VERSION.SDK_INT;
+            if (version >= Build.VERSION_CODES.O) {
+                if (version != 17) {//Context.startForegroundService() did not then call Service.startForeground()
+                    context.startForegroundService(new Intent(context, DownloadService.class));
+                }
+            } else {
+                context.startService(new Intent(context, DownloadService.class));
+            }
         }
-        //TODO 先屏蔽。後期改進
+    }
+
+    //在进程中去寻找当前APP的信息，判断是否在前台运行
+    private boolean isAppOnForeground(Context context) {
+        ActivityManager activityManager = (ActivityManager) context.getApplicationContext().getSystemService(
+                Context.ACTIVITY_SERVICE);
+        String packageName = context.getApplicationContext().getPackageName();
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+        if (appProcesses == null)
+            return false;
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.processName.equals(packageName)
+                    && appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                return true;
+            }
+        }
+        return false;
     }
 }

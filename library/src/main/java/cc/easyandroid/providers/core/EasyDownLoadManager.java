@@ -19,6 +19,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -64,7 +65,7 @@ public class EasyDownLoadManager extends Observable {
 
         ContentResolver resolver = context.getContentResolver();
         mDownloadManager = new DownloadManager(resolver, context.getPackageName());
-        mDownloadingList = new HashMap<>();
+        mDownloadingList = new LinkedHashMap<>();
         mChangeObserver = new ChangeObserver();
         mDataSetObserver = new MyDataSetObserver();
 
@@ -353,7 +354,7 @@ public class EasyDownLoadManager extends Observable {
     }
 
     private void notifyDataSetInvalidated() {//初始化数据
-        mDownloadingList = new HashMap<>();
+        mDownloadingList = new LinkedHashMap<>();
 
     }
 

@@ -9,7 +9,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.annotation.NonNull;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -101,8 +100,11 @@ class RealSystemFacade implements SystemFacade {
             NotificationChannel channel = new NotificationChannel("001","my_channel",NotificationManager.IMPORTANCE_DEFAULT);
             //channel.enableLights(true); //是否在桌面icon右上角展示小红点
             channel.setLightColor(Color.GREEN); //小红点颜色
+            channel.setVibrationPattern(new long[]{0});
+            channel.setSound(null,null);
             channel.setShowBadge(true); //是否在久按桌面图标时显示此渠道的通知
             mNotificationManager.createNotificationChannel(channel);
+            builder.setOnlyAlertOnce(true);
             builder.setChannelId("001");
         }
         mNotificationManager.notify(200, builder.build());

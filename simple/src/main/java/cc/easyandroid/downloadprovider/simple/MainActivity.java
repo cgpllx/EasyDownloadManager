@@ -4,9 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ListView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 import cc.easyandroid.providers.core.EasyDownLoadManager;
 import cc.easyandroid.providers.downloads.DownloadService;
 
-public class MainActivity extends  AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
     ListView listView;
     MyAdapter adapter;
 
